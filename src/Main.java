@@ -1,6 +1,14 @@
+import javax.swing.*;
+
 public class Main {
     public static void main(String[] args) {
-      MyJFrame myJFrame = new MyJFrame();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new MyJFrame();
+            }
+        });
+//      MyJFrame myJFrame = new MyJFrame();
 
     }
 }
