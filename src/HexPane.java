@@ -420,6 +420,7 @@ public class HexPane extends JTextArea {
                 infoPane.setFileSizeValueLabel(Long.toString(size));
                 setSymbolsCount((int) size * 3 - 1);
                 System.out.println("Symbols count" + getSymbolsCount());
+                deleteTempDir(Paths.get(curDir.toString() + "/tmp"));
             }
 
 
@@ -536,16 +537,20 @@ public class HexPane extends JTextArea {
 
     public void createTempFile(int startBuff){
 
+        int limit=12800000; // Для создания подкатологов, из расчета что в одном каталоге максимум 400 файлов
+
+        int dirNumb=startBuff/limit;
+
 
         try {
-            Files.createDirectories(Paths.get(curDir.toString() + "/tmp"));
+            Files.createDirectories(Paths.get(curDir.toString() + "\\tmp\\"  + dirNumb));
+            System.out.println("DIIR" + curDir.toString() + "\\tmp" + "\\" + dirNumb);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         try {
-                  if(!new File(curDir.toString() + "/tmp/" + startBuff+ "b.tmp").exists()){
-                      tempFile=Files.createFile(Paths.get(curDir.toString() + "/tmp/" + startBuff+ "b.tmp"));
-                      tempFile.toFile().deleteOnExit();
+                  if(!new File(curDir.toString() + "\\tmp\\" + dirNumb + "\\" +startBuff+ "b.tmp").exists()){
+                      tempFile=Files.createFile(Paths.get(curDir.toString() + "\\tmp\\" + dirNumb +"\\" + startBuff+ "b.tmp"));
                       tempFile.toFile().setWritable(true);
                   }
         } catch (IOException ex){
@@ -555,7 +560,9 @@ public class HexPane extends JTextArea {
     }
 
     public void writeTempFile(int offset,int len,int pos){
-        try(RandomAccessFile raf = new RandomAccessFile(curDir.toString() + "/tmp/" + offset+ "b.tmp", "rw")){
+        int limit=12800000; // Для создания подкатологов, из расчета что в одном каталоге максимум 400 файлов
+        int dirNumb=startBuff/limit;
+        try(RandomAccessFile raf = new RandomAccessFile(curDir.toString() + "\\tmp\\" +dirNumb +"\\"+ offset+ "b.tmp", "rw")){
                 raf.setLength(len);
                 byte[] newArr = new byte[len];
                 for(int i = 0; i < len; i++) newArr[i] = byteArr.get(i+pos);
