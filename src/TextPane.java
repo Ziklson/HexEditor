@@ -21,7 +21,7 @@ public class TextPane extends JTextArea {
         this.hexPane=hexPane;
         columns=hexPane.getBytes();
         rows=hexPane.getRows();
-
+        setMinimumSize(new Dimension(0,0));
         setColumns(columns);
         setRows(rows);
         setLineWrap(true);
@@ -60,6 +60,7 @@ public class TextPane extends JTextArea {
                 "doNothing");
 
 
+
         getActionMap().put("doNothing",
                 doNothing);
 
@@ -89,7 +90,10 @@ public class TextPane extends JTextArea {
                 if(pos*3 < size){
                     hexPane.setInserting(true);
                     hexPane.replaceRange(Integer.toHexString((int) key),pos*3,pos*3+2);
-                    textPane.replaceRange(Character.toString(key),pos,pos+1);
+                    if((int) key == 127)
+                        textPane.replaceRange("·",pos,pos+1);
+                    else
+                        textPane.replaceRange(Character.toString(key),pos,pos+1);
                     hexPane.setInserting(false);
                     if(pos == columns*rows-1){
                         hexPane.getWorkPane().getjScrollBarV().setValue(hexPane.getWorkPane().getjScrollBarV().getValue()+1);
@@ -98,6 +102,13 @@ public class TextPane extends JTextArea {
                     else{
                         setCaretPosition(pos+1);
                     }
+                    int curStr=hexPane.getWorkPane().getjScrollBarV().getValue();
+                    int offset=curStr*hexPane.getBytes()+pos - hexPane.getStartBuff();
+                    if(!hexPane.isBufferChanged())
+                        hexPane.setBufferChanged(true);
+                    Byte b= (byte) key;
+                    hexPane.getByteArr().set(offset,b);
+
                 }
                 else{
                     size+=3;
@@ -123,6 +134,17 @@ public class TextPane extends JTextArea {
                         hexPane.getInfoPane().setFileSizeValueLabel(Integer.toString((size+1)/3));
                         textPane.getDocument().remove(pos-1,1);
                         hexPane.getDocument().remove(pos*3-3, 3);
+                        hexPane.setFileSize(hexPane.getFileSize()-1);
+
+                        int curStr=hexPane.getWorkPane().getjScrollBarV().getValue();
+                        int offset=curStr*hexPane.getBytes()+pos-1 - hexPane.getStartBuff();
+                        if(!hexPane.isBufferChanged())
+                            hexPane.setBufferChanged(true);
+                        hexPane.getByteArr().remove(offset);
+                        hexPane.insertPage((hexPane.getWorkPane().getjScrollBarV().getValue()-hexPane.getStartBuff()/hexPane.getBytes())*hexPane.getBytes());
+                        setCaretPosition(pos-1);
+
+
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }
@@ -186,6 +208,11 @@ public class TextPane extends JTextArea {
         }
 
 
+    }
+
+    public void setVisibleRows(int rows){
+        this.rows=rows;
+        this.setRows(rows);
     }
 
 

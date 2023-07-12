@@ -42,7 +42,7 @@ public class MyInfoPane extends JPanel {
         byteInfoLabel=new JLabel("Byte information");
         fileSizeValueLabel=new JLabel("0 bytes");
         fileNameValueLabel=new JLabel("-Untitled-");
-
+        fileNameValueLabel.setSize(20,20);
         byteTypeLabel=new JLabel("Type");
         unsignedLabel=new JLabel("Unsigned (+)");
         signedLabel=new JLabel("Signed(±)");
@@ -75,7 +75,7 @@ public class MyInfoPane extends JPanel {
 
         add(fileInfoLabel,new GridBagConstraints(0,0,3,1,1,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
         add(fileNameLabel,new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-        add(fileNameValueLabel,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+        add(fileNameValueLabel,new GridBagConstraints(1,1,2,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
         add(fileSizeLabel,new GridBagConstraints(0,2,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
         add(fileSizeValueLabel,new GridBagConstraints(1,2,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
@@ -104,7 +104,14 @@ public class MyInfoPane extends JPanel {
         this.fileSizeValueLabel.setText(size + " bytes");
     }
 
-    public void setFileNameValueLabel(String name){this.fileNameValueLabel.setText(name);}
+    public void setFileNameValueLabel(String name){
+        StringBuilder sb=new StringBuilder(name);
+        if(name.length() > 15){
+            sb.setLength(10);
+            sb.append("...");
+        }
+        this.fileNameValueLabel.setText(sb.toString());
+    }
 
 
     public void setByteValueLabel(String byteValue){
@@ -120,18 +127,5 @@ public class MyInfoPane extends JPanel {
             this.byteTypeUnsignedValueLabel.setText(Integer.toString(unsigned));
             this.byteTypeSignedValueLabel.setText(Integer.toString(signed));
         }
-//        else{
-//            char c=byteValue.charAt(0);
-//            int unsigned=(int) c;
-//            int signed=unsigned;
-//            if(unsigned>127)
-//                signed=unsigned-256;
-//            this.byteTypeUnsignedValueLabel.setText(Integer.toString(unsigned));
-//            this.byteTypeSignedValueLabel.setText(Integer.toString(signed));
-//        }
-        //this.setByteValueLabel(byteValue);
-
-
-
     }
 }

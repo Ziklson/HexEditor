@@ -4,6 +4,7 @@ import javax.swing.text.BadLocationException;
 
 import javax.swing.text.Document;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -11,12 +12,10 @@ import java.io.*;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,15 +53,21 @@ public class HexPane extends JTextArea {
 
     private boolean isInserting;
 
-    public boolean isBufferChanged() {
-        return isBufferChanged;
-    }
 
     public void setBufferChanged(boolean bufferChanged) {
-        isBufferChanged = bufferChanged;
+        BufferChanged = bufferChanged;
     }
 
-    private boolean isBufferChanged;
+    public boolean isBufferChanged() {
+        return BufferChanged;
+    }
+
+    private boolean BufferChanged;
+
+
+    public int getStartBuff() {
+        return startBuff;
+    }
 
     private int startBuff;
 
@@ -98,15 +103,30 @@ public class HexPane extends JTextArea {
 
     private int bytes;
 
+    private int limit_file_per_dir;
+
+    public Path getCurPath() {
+        return curPath;
+    }
+
     private Path curPath;
 
     private Path curDir;
     private Path tempFile;
 
-    private static final String TEMP_FILE_POSTFIX = ".tmp";
 
 
     private byte[] byteBuffer;
+
+    public int getBuffFullness() {
+        return buffFullness;
+    }
+
+    private int buffFullness;
+
+    public List<Byte> getByteArr() {
+        return byteArr;
+    }
 
     private List<Byte> byteArr;
 
@@ -124,13 +144,17 @@ public class HexPane extends JTextArea {
         setBufferChanged(false);
         this.workPane=workPane;
         curDir=Paths.get("").toAbsolutePath();
-
-        bytes = 16;
+        startBuff=0;
+       // bytes = 16;
+        setMinimumSize(new Dimension(0,0));
+        bytes=16;
         columns = 3 * bytes - 1;
-        rows = 20;
+        buffFullness=0;
+        rows = 30;
         prox=rows*4;
         byteBuffer=new byte[64000];
         byteArr=new ArrayList<Byte>();
+        limit_file_per_dir=byteBuffer.length/2 * 400; // Ограничиваем по 400 файлов в одной dir
         setColumns(columns);
         symbolsCount = 0;
         setRows(rows);
@@ -198,7 +222,7 @@ public class HexPane extends JTextArea {
 
         int k = Integer.parseInt(str,16);
 
-        if(k < 32)
+        if(k < 32 || k == 127)
             return "·";
 
         for (int i = 0; i < str.length(); i += 2) {
@@ -244,6 +268,14 @@ public class HexPane extends JTextArea {
                         textPane.replaceRange(hexPane.toChar(strAtPos), pos / 3, pos / 3 + 1);
                         setInserting(false);
                         hexPane.setCaretPosition(pos+1);
+
+                        int curStr=workPane.getjScrollBarV().getValue();
+                        int offset=curStr*bytes+pos/3 - startBuff;
+                        if(!isBufferChanged())
+                            setBufferChanged(true);
+                        Byte b= (byte) Integer.parseInt(strAtPos,16);
+                        byteArr.set(offset,b);
+
                     }
                     if (pos % 3 == 1) {
                         setInserting(true);
@@ -264,7 +296,7 @@ public class HexPane extends JTextArea {
 
                         int curStr=workPane.getjScrollBarV().getValue();
                         int offset=curStr*bytes+(pos-1)/3 - startBuff;
-                        if(!isBufferChanged)
+                        if(!isBufferChanged())
                             setBufferChanged(true);
                         Byte b= (byte) Integer.parseInt(strAtPos,16);
                         byteArr.set(offset,b);
@@ -295,10 +327,12 @@ public class HexPane extends JTextArea {
                         hexPane.getDocument().remove(pos - 3, 3);
 //                        textPane.getDocument().remove(pos/3 -1,1);
 
+                        setFileSize(getFileSize()-1);
+
                         int curStr=workPane.getjScrollBarV().getValue();
                         int offset=curStr*bytes+(pos-3)/3 - startBuff;
-//                        writeTempFile(strAtPos,-1,offset);
-                        if(!isBufferChanged)
+
+                        if(!isBufferChanged())
                             setBufferChanged(true);
                         byteArr.remove(offset);
                         insertPage((workPane.getjScrollBarV().getValue()-startBuff/bytes)*bytes);
@@ -396,38 +430,96 @@ public class HexPane extends JTextArea {
 
 
     public void readFile(Path path, long pos, boolean firstRead){
-        try(RandomAccessFile raf = new RandomAccessFile(path.toString(), "r")){
-            System.out.println("Я прочитал с позиции " + pos);
-
-            raf.seek(pos);
-            Arrays.fill(byteBuffer,(byte) 0);
-            raf.read(byteBuffer, 0, byteBuffer.length);
-
-            byteArr = IntStream.range(0, byteBuffer.length).mapToObj(i -> byteBuffer[i]).collect(Collectors.toList());
-
-
-            startBuff=page*byteBuffer.length/2;
-            System.out.println("StartBuff "+ startBuff);
-
-
-            if(firstRead){
-                curPath=path;
-                insertPage((int) pos);
+        if(firstRead){
+            try(RandomAccessFile raf=new RandomAccessFile(path.toString(),"r")){
                 long size=raf.length();
-                setFileSize(size);
+
+                Arrays.fill(byteBuffer,(byte) 0);
+
+                if(size < byteBuffer.length)
+                    buffFullness=(int) size;
+                else
+                    buffFullness=byteBuffer.length;
+
+                raf.read(byteBuffer,0,byteBuffer.length);
+                byteArr = IntStream.range(0, byteBuffer.length).mapToObj(i -> byteBuffer[i]).collect(Collectors.toList());
+
+
+
+                curPath=path;
+//                long size=raf.length();
                 int barSize=(int) size/bytes + 1;
                 workPane.setJScrollBarVSize(barSize);
                 infoPane.setFileSizeValueLabel(Long.toString(size));
                 setSymbolsCount((int) size * 3 - 1);
-                System.out.println("Symbols count" + getSymbolsCount());
-                deleteTempDir(Paths.get(curDir.toString() + "/tmp"));
+                setFileSize(size);
+
+                infoPane.setFileNameValueLabel(curPath.getFileName().toString());
+
+                insertPage(0);
+                if(Files.exists(Paths.get(curDir.toString()+"/tmp")))
+                    deleteTempDir(Paths.get(curDir.toString() + "/tmp"));
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+        else{
+            Path source;
+            long size=0;
+            if(isTempFileExist((int) pos)){
+                source=getTempFile((int) pos);
+                try {
+                    size=Files.size(source);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else{
+                source=curPath;
+                size=byteBuffer.length/2;
+            }
+            if(size != 0){
+                if(buffFullness+size <= byteBuffer.length){
+                    try(RandomAccessFile raf=new RandomAccessFile(source.toString(),"r")){
+                        if(source == curPath){
+//                            System.out.println("Читаю с исходника " + pos);
+                            raf.seek(pos);
+                            raf.read(byteBuffer,buffFullness,(int) size);
+                        }
+                        else{
+                            raf.read(byteBuffer,buffFullness,(int) size);
+//                            System.out.println("Читаю с темпа " + pos);
+                        }
 
+                        if(buffFullness == byteBuffer.length){
+                            byteArr = IntStream.range(0, buffFullness).mapToObj(i -> byteBuffer[i]).collect(Collectors.toList());
+                            //buffFullness=0;
+                            insertPage(workPane.getjScrollBarV().getValue()*bytes - startBuff);
+                        }
+                        else{
+                            buffFullness+=size;
+                            readFile(curPath,pos+byteBuffer.length/2,false);
+                        }
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                else{
+                    byteArr = IntStream.range(0, buffFullness).mapToObj(i -> byteBuffer[i]).collect(Collectors.toList());
+                    insertPage(workPane.getjScrollBarV().getValue()*bytes - startBuff);
+                }
+
+            }
+            else{
+                readFile(curPath,pos+byteBuffer.length/2,false);
+            }
         }
     }
 
@@ -436,7 +528,6 @@ public class HexPane extends JTextArea {
         StringBuilder sbHex = new StringBuilder();
         StringBuilder sbText = new StringBuilder();
         for(int i=pos;i<pos+bytes*rows;i++) {
-            //int a = (int) byteBuffer[i];
             int a = (int) byteArr.get(i);
             if (a < 0)
                 a += 256;
@@ -470,110 +561,142 @@ public class HexPane extends JTextArea {
 
     public void readBuffer(int pos){
 
-        //int k=byteBuffer.length/bytes; // сколько строк вмещается в буффер
-        int k =byteArr.size()/bytes;
 
-//        if(pos*bytes > startBuff +byteBuffer.length || pos*bytes < startBuff){
-        if(pos*bytes > startBuff +byteArr.size() || pos*bytes < startBuff){
-            if(isBufferChanged){
-                createTempFile(startBuff);
+        if(pos*bytes > startBuff + byteArr.size() || pos*bytes < startBuff){ // pos*bytes - на каком байте сейчас JScrollBar (байт на начало строки)
+            if(isBufferChanged()){
                 setBufferChanged(false);
-                if(byteArr.size() < byteBuffer.length/2)
-                    writeTempFile(startBuff,byteArr.size(),0);
-                else{
-                    if(byteArr.size() <= byteBuffer.length){
-                        writeTempFile(startBuff,byteBuffer.length/2,0);
-                        writeTempFile(startBuff+byteBuffer.length/2,byteArr.size()-byteBuffer.length/2,byteBuffer.length/2);
-                    }
-                }
+                saveBuffer(startBuff);
             }
-            page=pos*bytes/(byteBuffer.length/2);
-            System.out.println("Я отработал пушто был какой то резкий переход " + page );
-
-            readFile(curPath,page*byteBuffer.length/2, false);
-        }
-
-        if(startBuff !=0 && pos < startBuff/bytes +prox){
-            System.out.println("Я на нижней границе! " + pos);
-            if(isBufferChanged){
-                createTempFile(startBuff);
-                setBufferChanged(false);
-                if(byteArr.size() < byteBuffer.length/2)
-                    writeTempFile(startBuff,byteArr.size(),0);
-                else{
-                    if(byteArr.size() <= byteBuffer.length){
-                        writeTempFile(startBuff,byteBuffer.length/2,0);
-                        writeTempFile(startBuff+byteBuffer.length/2,byteArr.size()-byteBuffer.length/2,byteBuffer.length/2);
-                    }
-                }
-            }
-            page-=1;
-            readFile(curPath, page*byteBuffer.length/2,false);
+            page=pos*bytes/(byteBuffer.length/2); // page - номер буффера(половинки), (0-32000) - 0, (32000-64000) - 1 и т.д.
+//            System.out.println("Я отработал пушто был какой то резкий переход " + page);
+            startBuff=page*byteBuffer.length/2;
+            Arrays.fill(byteBuffer,(byte) 0);
+            byteArr.clear();
+            buffFullness=0;
+            readFile(curPath,startBuff, false);
         }
         else{
-            if(startBuff+byteBuffer.length<getFileSize() && pos>(startBuff/bytes)+k - prox){
-                if(isBufferChanged){
-                    createTempFile(startBuff);
+            if(startBuff !=0 && pos<startBuff/bytes + prox){
+//                System.out.println("Я на нижней границе! " + pos);
+                if(isBufferChanged()){
                     setBufferChanged(false);
-                    if(byteArr.size() < byteBuffer.length/2)
-                        writeTempFile(startBuff,byteArr.size(),0);
-                    else{
-                        if(byteArr.size() <= byteBuffer.length){
-                            writeTempFile(startBuff,byteBuffer.length/2,0);
-                            writeTempFile(startBuff+byteBuffer.length/2,byteArr.size()-byteBuffer.length/2,byteBuffer.length/2);
-                        }
-                    }
+                    saveBuffer(startBuff);
                 }
-                System.out.println("Я на верхней границе! " + pos);
-                page+=1;
-                readFile(curPath, page*byteBuffer.length/2,false);
+                page-=1;
+                startBuff-=byteBuffer.length/2;
+                Arrays.fill(byteBuffer,(byte) 0);
+                byteArr.clear();
+                buffFullness=0;
+                readFile(curPath, startBuff,false);
             }
             else{
-                insertPage((pos-startBuff/bytes)*bytes);
+                int k = byteArr.size()/bytes;
+                if(startBuff+byteArr.size() < getFileSize() && pos>(startBuff/bytes)+k-prox){
+                    if(isBufferChanged()){
+                        setBufferChanged(false);
+                        saveBuffer(startBuff);
+                    }
+
+//                    System.out.println("Я на верхней границе! " + pos);
+
+                    page+=1;
+                    startBuff+=byteBuffer.length/2;
+                    Arrays.fill(byteBuffer,(byte) 0);
+                    byteArr.clear();
+                    buffFullness=0;
+                    readFile(curPath, startBuff,false);
+                }
+                else{
+                    insertPage((pos-startBuff/bytes)*bytes);
+                }
             }
         }
+
     }
 
 
-    public void createTempFile(int startBuff){
-
-        int limit=12800000; // Для создания подкатологов, из расчета что в одном каталоге максимум 400 файлов
-
-        int dirNumb=startBuff/limit;
-
+    public Path createTempFile(int startBuff){
+        int dirNumb=startBuff/limit_file_per_dir;
 
         try {
             Files.createDirectories(Paths.get(curDir.toString() + "\\tmp\\"  + dirNumb));
-            System.out.println("DIIR" + curDir.toString() + "\\tmp" + "\\" + dirNumb);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         try {
-                  if(!new File(curDir.toString() + "\\tmp\\" + dirNumb + "\\" +startBuff+ "b.tmp").exists()){
-                      tempFile=Files.createFile(Paths.get(curDir.toString() + "\\tmp\\" + dirNumb +"\\" + startBuff+ "b.tmp"));
-                      tempFile.toFile().setWritable(true);
-                  }
+            tempFile=Files.createFile(Paths.get(curDir.toString()+"\\tmp\\"+dirNumb+"\\"+startBuff+"b.tmp"));
+
         } catch (IOException ex){
             System.err.println(ex);
+        }
+        return tempFile;
+    }
+
+    public void saveBuffer(int offset){
+        int dirNumb=startBuff/limit_file_per_dir;
+
+        int size=byteArr.size();
+        Path path;
+
+        if(size <= byteBuffer.length){
+            if(size <= byteBuffer.length/2){
+                if(isTempFileExist(offset)){
+                    path=getTempFile(offset);
+                }
+                else{
+                    path=createTempFile(offset);
+                }
+                writeTempFile(path,size,0);
+
+                if(isTempFileExist(offset+byteBuffer.length/2)){
+                    path=getTempFile(offset+byteBuffer.length/2);
+                }
+                else{
+                    path=createTempFile(offset+byteBuffer.length/2);
+                }
+
+                writeTempFile(path,0,0);
+            }
+            else{
+                if(isTempFileExist(offset)){
+                    path=getTempFile(offset);
+                }
+                else{
+                    path=createTempFile(offset);
+                }
+
+                writeTempFile(path,byteBuffer.length/2,0);
+
+                if(isTempFileExist(offset+byteBuffer.length/2)){
+                    path=getTempFile(offset+byteBuffer.length/2);
+                }
+                else{
+                    path=createTempFile(offset+byteBuffer.length/2);
+                }
+                writeTempFile(path,size-byteBuffer.length/2,byteBuffer.length/2);
+            }
+        }
+        else{
+
         }
 
     }
 
-    public void writeTempFile(int offset,int len,int pos){
-        int limit=12800000; // Для создания подкатологов, из расчета что в одном каталоге максимум 400 файлов
-        int dirNumb=startBuff/limit;
-        try(RandomAccessFile raf = new RandomAccessFile(curDir.toString() + "\\tmp\\" +dirNumb +"\\"+ offset+ "b.tmp", "rw")){
-                raf.setLength(len);
-                byte[] newArr = new byte[len];
-                for(int i = 0; i < len; i++) newArr[i] = byteArr.get(i+pos);
-                raf.write(newArr,0,len);
+
+    public void writeTempFile(Path path, int size,int pos){
+        try(RandomAccessFile raf = new RandomAccessFile(path.toString(), "rw")){
+            raf.setLength(size);
+            if(size != 0) {
+                byte[] newArr = new byte[size];
+                for (int i = 0; i < size; i++) newArr[i] = byteArr.get(i+pos);
+                raf.write(newArr, 0, size);
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 
     public void deleteTempDir(Path dir){
         try {
@@ -584,6 +707,93 @@ public class HexPane extends JTextArea {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean isTempFileExist(int fileName){ // fileName - startBuf + b + .tmp
+        StringBuilder path = new StringBuilder();
+        path.append(curDir.toString());
+        path.append("\\tmp\\");
+        path.append(fileName / limit_file_per_dir);
+        path.append("\\" + fileName + "b.tmp");
+
+
+        return Files.exists(Paths.get(path.toString()), LinkOption.NOFOLLOW_LINKS);
+    }
+
+    public Path getTempFile(int fileName){
+        StringBuilder path = new StringBuilder();
+        path.append(curDir.toString());
+        path.append("\\tmp\\");
+        path.append(fileName / limit_file_per_dir);
+        path.append("\\" + fileName + "b.tmp");
+        return Paths.get(path.toString());
+    }
+
+
+    public void saveAs(Path path, boolean overwrite){
+
+        long size = getFileSize();
+        long pos=0;
+        int curStartBuf=startBuff;
+        int bufActSize=0;
+        System.out.println("SIIZE " +size);
+
+
+        if(!overwrite){
+            try {
+                Files.createFile(path);
+            } catch (IOException ex){
+                System.err.println(ex);
+            }
+        }
+
+        for(int i=0;i<size;i+=byteBuffer.length){
+            if(i != curStartBuf){
+                readFile(curPath,i,false);
+                bufActSize=buffFullness;
+            }
+            else{
+                for(int k=0;k<buffFullness;k++){
+                    byteBuffer[k]=byteArr.get(k);
+                }
+                bufActSize=byteArr.size();
+            }
+
+            System.out.println("BUFACTSIZE " +bufActSize);
+            try(RandomAccessFile raf = new RandomAccessFile(path.toString(), "rw")){
+                raf.seek(pos);
+                raf.write(byteBuffer,0,bufActSize);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            pos+=bufActSize;
+            buffFullness=0;
+            byteArr.clear();
+        }
+        try(RandomAccessFile raf = new RandomAccessFile(path.toString(), "rw")){
+            raf.setLength(size);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        readFile(curPath,curStartBuf,false);
+    }
+
+//    public void Save(Path path){
+//
+//    }
+
+    public void setVisibleRows(int rows){
+        this.rows=rows;
+        this.setRows(rows);
+        prox=rows*4;
+        textPane.setVisibleRows(rows);
+        workPane.setRows(rows);
+
+        readBuffer(workPane.getjScrollBarV().getValue());
     }
 
 }

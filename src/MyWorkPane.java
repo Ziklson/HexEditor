@@ -43,7 +43,7 @@ public class MyWorkPane extends JPanel {
     public void setRows(int rows) {
         this.rows = rows;
         rowHeader.setRows(rows);
-
+        updateRowHeader(rows,columns,getjScrollBarV().getValue());
     }
 
     public int getColumns() {
@@ -59,12 +59,13 @@ public class MyWorkPane extends JPanel {
 
     MyWorkPane() {
         super();
-        rows=20;
-        columns=16;
         setLayout(new GridBagLayout());
         hexArea=new HexPane(this);
         hexAreaPane=new JPanel();
         textPane=new TextPane(hexArea);
+
+        rows=hexArea.getRows();
+        columns=hexArea.getBytes();
 
         columnHeader=new JTextArea();
 
@@ -77,7 +78,7 @@ public class MyWorkPane extends JPanel {
         rowHeader.setRows(rows);
         rowHeader.setColumns(8);
 
-        rowHeader.setWrapStyleWord(true);
+        //  rowHeader.setWrapStyleWord(true);
 
 
 
@@ -116,43 +117,50 @@ public class MyWorkPane extends JPanel {
 //        hexAreaPane.add(textPane,new GridBagConstraints(2,1,1,1,1,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
 
-        hexAreaPane.add(hexArea,new GridBagConstraints(0,0,1,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 0, 1, 1),0,0));
+///////
+//        hexAreaPane.add(hexArea,new GridBagConstraints(0,0,1,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 0, 1, 1),0,0));
 
-        hexAreaPane.add(textPane,new GridBagConstraints(1,0,1,1,1,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 20, 1, 1),0,0));
+//        hexAreaPane.add(textPane,new GridBagConstraints(1,0,1,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 20, 1, 1),0,0));
+///////
 
-        jScrollPane=new JScrollPane(hexAreaPane);
 
-        JViewport jViewport = new JViewport();
-        JViewport jViewport2 = new JViewport();
+        //hexAreaPane.add(new JPanel(),new GridBagConstraints(2,0,1,1,1,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 20, 1, 1),0,0));
 
-        jViewport.setView(columnHeader);
-        jViewport2.setView(rowHeader);
+//        jScrollPane=new JScrollPane(hexAreaPane);
+//
+//        JViewport jViewport = new JViewport();
+//        JViewport jViewport2 = new JViewport();
+//
+//        jViewport.setView(columnHeader);
+//        jViewport2.setView(rowHeader);
         columnHeader.setBackground(new Color(229,228,226));
         columnHeader.setForeground(new Color(255,0,0));
         rowHeader.setBackground(new Color(229,228,226));
         rowHeader.setForeground(new Color(255,0,0));
-        jScrollPane.setColumnHeader(jViewport);
-        jScrollPane.setRowHeader(jViewport2);
+//        jScrollPane.setColumnHeader(jViewport);
+//        jScrollPane.setRowHeader(jViewport2);
 
 
 
         jScrollBarV = new JScrollBar(Adjustable.VERTICAL);
+        JScrollBar jScrollBarH=new JScrollBar(Adjustable.HORIZONTAL);
+        jScrollBarH.setMinimum(0);
+        jScrollBarH.setMaximum(200);
 
         jScrollBarV.setMinimum(0);
         jScrollBarV.setMaximum(200);
 
-        jScrollBarV.setUnitIncrement(1);
-        System.out.println(jScrollBarV.getVisibleAmount() + " VISIBLE AMOUNT");
-        jScrollBarV.setVisibleAmount(1);
-        System.out.println(jScrollBarV.getVisibleAmount() + " VISIBLE AMOUNT NEW");
+        //jScrollBarV.setUnitIncrement(1);
 
+        //jScrollBarV.setVisibleAmount(1);
+        jScrollBarV.setMinimumSize(new Dimension(0,1));
 
 
         jScrollBarV.addAdjustmentListener(new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
 
-                System.out.println(e.getValue());
+                //System.out.println(e.getValue());
                 int value = e.getValue();
 
                 updateRowHeader(rows,columns,value);
@@ -166,18 +174,51 @@ public class MyWorkPane extends JPanel {
 
 
 
+        JTextArea cl=new JTextArea();
+        cl.setColumns(columns);
+        cl.setFont(font);
+        cl.setEditable(false);
+
+        cl.setBackground(new Color(229,228,226));
+        cl.setForeground(new Color(255,0,0));
+        for(int i=0;i<columns;i++){
+            cl.append("0");
+        }
+
+//        JTextArea cl2=new JTextArea();
+//        cl2.setEditable(false);
+//        cl2.setFont(font);
+//        cl2.setBackground(new Color(229,228,226));
+//        cl2.setForeground(new Color(255,0,0));
+//        for(int i=0;i<columns;i++){
+//            cl2.append(" ");
+//        }
+//        cl2.setText("                ");
+///
 
 
-        add(columnHeader,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
 
 
+
+
+        add(columnHeader,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+//
+//
         add(rowHeader,new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+//
+//
 
-        add(hexAreaPane,new GridBagConstraints(1,1,1,1,1,1,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
+        add(hexArea,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
+//
+        add(cl,new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 10, 1, 1),0,0));
 
-//        add(jScrollPane,new GridBagConstraints(0,0,1,1,1,1,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
+        add(textPane,new GridBagConstraints(2,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 10, 1, 1),0,0));
+//
 
-        add(jScrollBarV,new GridBagConstraints(2,1,1,1,0,0,GridBagConstraints.EAST,GridBagConstraints.VERTICAL,new Insets(1, 1, 1, 1),0,0));
+        add(jScrollBarV,new GridBagConstraints(3,1,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(jScrollBarH,new GridBagConstraints(0,2,3,1,0,1,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
+
 
 
 
@@ -189,26 +230,52 @@ public class MyWorkPane extends JPanel {
 
     public void createRowHeader(int rows, int columns){
         rowHeader.setText("");
+        StringBuilder sb=new StringBuilder("00000000");
         for(int i=0,diff=0;i<rows;i++,diff+=columns){
-            rowHeader.append(Integer.toHexString(diff) + "\n");
+            int len=Integer.toHexString(diff).length();
+            sb.replace(8-len,8,Integer.toHexString(diff));
+
+            // rowHeader.append(Integer.toHexString(diff) + "\n");
+            if(i != rows-1)
+                rowHeader.append(sb.toString() + "\n");
+            else
+                rowHeader.append(sb.toString());
         }
     }
 
     public void updateRowHeader(int rows,int columns, int offset){
         rowHeader.setText("");
+        StringBuilder sb=new StringBuilder("00000000");
         for(int i=offset,diff=offset*columns;i<offset+rows;i++,diff+=columns){
-            rowHeader.append(Integer.toHexString(diff) +"\n");
+            int len=Integer.toHexString(diff).length();
+            sb.replace(8-len,8,Integer.toHexString(diff));
+            if(i != offset+rows-1){
+                rowHeader.append(sb.toString() + "\n");
+            }
+
+            else{
+                rowHeader.append(sb.toString());
+            }
+
         }
     }
 
     public void createColumnHeader(int columns) {
         columnHeader.setText("");
-        for(int i=0;i<columns-1;i++) {
-                columnHeader.append("0" + Integer.toHexString(i) + " ");
+        StringBuilder sb=new StringBuilder();
+        for(int i=0;i<columns;i++) {
+                int len = Integer.toHexString(i).length();
+                if(len == 1){
+                    columnHeader.append("0"+Integer.toHexString(i));
+                }
+                else
+                    columnHeader.append(Integer.toHexString(i));
+                if(i != columns -1){
+                    columnHeader.append(" ");
+                }
+//                columnHeader.append("0" + Integer.toHexString(i) + " ");
         }
-        columnHeader.append("0" + Integer.toHexString(columns-1));
-
-
+//        columnHeader.append("0" + Integer.toHexString(columns-1));
     }
 
     public HexPane getHexArea() {

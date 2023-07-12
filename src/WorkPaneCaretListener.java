@@ -46,8 +46,8 @@ public class WorkPaneCaretListener implements CaretListener {
             hText.removeAllHighlights();
             hHex.removeAllHighlights();
 
-            System.out.println("CaretPosHex" + posHex);
-
+//            System.out.println("CaretPosHex" + posHex);
+//
 
         if (posHex != size) { // Чтобы не было бага с переносом новой строки
                 try {
@@ -82,7 +82,7 @@ public class WorkPaneCaretListener implements CaretListener {
                 hHex.removeAllHighlights();
                 int posText=textPane.getCaretPosition();
 
-                System.out.println("posText " + posText);
+//                System.out.println("posText " + posText);
                 if(posText*3 != size){
                     try {
                         hHex.addHighlight(posText*3,posText*3+2, DefaultHighlighter.DefaultPainter);
