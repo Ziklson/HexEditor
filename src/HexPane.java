@@ -2,6 +2,7 @@ import javax.swing.*;
 
 import javax.swing.text.BadLocationException;
 
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 
 import java.awt.*;
@@ -167,6 +168,12 @@ public class HexPane extends JTextArea {
 
         getCaret().setBlinkRate(1000);
 
+        DefaultCaret caret=(DefaultCaret) getCaret();
+        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+//
+        setPreferredSize(new Dimension(0,0));
+
+        //
         addKeyListener(new HexKeyListener(this));
 
 
@@ -555,7 +562,6 @@ public class HexPane extends JTextArea {
         setText(sbHex.toString());
         textPane.setText(sbText.toString());
         setInserting(false);
-
     }
 
 
@@ -794,6 +800,24 @@ public class HexPane extends JTextArea {
         workPane.setRows(rows);
 
         readBuffer(workPane.getjScrollBarV().getValue());
+    }
+
+    public void setColumnsCount(int columns){
+        setBytes(columns);
+        this.columns=3*bytes-1;
+        this.setColumns(this.columns);
+        if(curPath != null){
+            int barSize=(int) getFileSize()/bytes + 1;
+            workPane.setJScrollBarVSize(barSize);
+        }
+        textPane.setColumnsCount(columns);
+        workPane.setColumns(columns);
+
+        //readBuffer(workPane.getjScrollBarV().getValue());
+        setPreferredSize(new Dimension(0,0));
+        textPane.setPreferredSize(new Dimension(0,0));
+        System.out.println("COLUMNS "+ this.getColumns());
+        System.out.println("TextPaneColumns "+textPane.getColumns());
     }
 
 }

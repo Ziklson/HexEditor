@@ -34,6 +34,16 @@ public class MyWorkPane extends JPanel {
     private JScrollBar jScrollBarV;
 
 
+    public JScrollPane getjScroll() {
+        return jScroll;
+    }
+
+    public void setjScroll(JScrollPane jScroll) {
+        this.jScroll = jScroll;
+    }
+
+    private JScrollPane jScroll;
+
     private int rows;
 
     public int getRows() {
@@ -46,12 +56,17 @@ public class MyWorkPane extends JPanel {
         updateRowHeader(rows,columns,getjScrollBarV().getValue());
     }
 
+
+
     public int getColumns() {
         return columns;
     }
 
     public void setColumns(int columns) {
         this.columns = columns;
+        columnHeader.setColumns(columns*3-1);
+        createColumnHeader(this.columns);
+        updateRowHeader(rows,columns,getjScrollBarV().getValue());
     }
 
     private int columns;
@@ -143,24 +158,25 @@ public class MyWorkPane extends JPanel {
 
 
         jScrollBarV = new JScrollBar(Adjustable.VERTICAL);
-        JScrollBar jScrollBarH=new JScrollBar(Adjustable.HORIZONTAL);
-        jScrollBarH.setMinimum(0);
-        jScrollBarH.setMaximum(200);
+//        JScrollBar jScrollBarH=new JScrollBar(Adjustable.HORIZONTAL);
+//        jScrollBarH.setMinimum(0);
+//        jScrollBarH.setMaximum(200);
 
-        jScrollBarV.setMinimum(0);
-        jScrollBarV.setMaximum(200);
+       // jScrollBarV.setMinimum(0);
+        //jScrollBarV.setMaximum(200);
+        jScrollBarV.setUnitIncrement(100);
 
-        //jScrollBarV.setUnitIncrement(1);
+//        jScrollBarV.setUnitIncrement(1);
 
-        //jScrollBarV.setVisibleAmount(1);
-        jScrollBarV.setMinimumSize(new Dimension(0,1));
+//        jScrollBarV.setVisibleAmount(1);
+//        jScrollBarV.setMinimumSize(new Dimension(0,1));
 
 
         jScrollBarV.addAdjustmentListener(new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
 
-                //System.out.println(e.getValue());
+                System.out.println("ScVal "+ e.getValue());
                 int value = e.getValue();
 
                 updateRowHeader(rows,columns,value);
@@ -197,27 +213,55 @@ public class MyWorkPane extends JPanel {
 ///
 
 
+///////////////
+        JPanel jp=new JPanel();
+        jp.setLayout(new GridBagLayout());
 
 
 
+        jp.add(hexArea,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+        jp.add(textPane,new GridBagConstraints(2,1,1,1,1,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 10, 1, 1),0,0));
 
-        add(columnHeader,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        jScroll=new JScrollPane();
+
+
+        jScroll.setViewportView(jp);
+        jScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        JViewport jv1=new JViewport();
+        JViewport jv2=new JViewport();
+        jv1.setView(rowHeader);
+        jv2.setView(columnHeader);
+        jScroll.setRowHeader(jv1);
+        jScroll.setColumnHeader(jv2);
+
+        jScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+
+
+        add(jScroll,new GridBagConstraints(0,0,1,1,1,1,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
+
+        add(jScrollBarV,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.VERTICAL,new Insets(1, 1, 1, 1),0,0));
+//////////////
+
+//        add(columnHeader,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 //
 //
-        add(rowHeader,new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+//        add(rowHeader,new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 //
 //
-
-        add(hexArea,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
 //
-        add(cl,new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 10, 1, 1),0,0));
-
-        add(textPane,new GridBagConstraints(2,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 10, 1, 1),0,0));
 //
+//        add(hexArea,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
+//
+//        add(cl,new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 10, 1, 1),0,0));
+//
+//        add(textPane,new GridBagConstraints(2,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 10, 1, 1),0,0));
+//
+//
+//        add(jScrollBarV,new GridBagConstraints(3,1,1,1,1,1,GridBagConstraints.WEST,GridBagConstraints.VERTICAL,new Insets(1, 1, 1, 1),0,0));
 
-        add(jScrollBarV,new GridBagConstraints(3,1,1,1,1,0,GridBagConstraints.WEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-
-        add(jScrollBarH,new GridBagConstraints(0,2,3,1,0,1,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
+//        add(jScrollBarH,new GridBagConstraints(0,2,3,1,0,1,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
 
 
 
@@ -263,6 +307,7 @@ public class MyWorkPane extends JPanel {
     public void createColumnHeader(int columns) {
         columnHeader.setText("");
         StringBuilder sb=new StringBuilder();
+        StringBuilder sb2=new StringBuilder();
         for(int i=0;i<columns;i++) {
                 int len = Integer.toHexString(i).length();
                 if(len == 1){
@@ -275,6 +320,10 @@ public class MyWorkPane extends JPanel {
                 }
 //                columnHeader.append("0" + Integer.toHexString(i) + " ");
         }
+        for(int i=0;i<hexArea.getBytes()+1;i++){
+            sb2.append(" ");
+        }
+        columnHeader.append(sb2.toString());
 //        columnHeader.append("0" + Integer.toHexString(columns-1));
     }
 

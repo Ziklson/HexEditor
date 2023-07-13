@@ -1,5 +1,7 @@
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Caret;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
@@ -22,13 +24,18 @@ public class TextPane extends JTextArea {
         columns=hexPane.getBytes();
         rows=hexPane.getRows();
         setMinimumSize(new Dimension(0,0));
+
         setColumns(columns);
         setRows(rows);
         setLineWrap(true);
         hexPane.setTextPane(this);
         addKeyListener(new TextKeyListener(this));
-
-
+        ///
+        DefaultCaret caret=(DefaultCaret) getCaret();
+        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        ///
+        setPreferredSize(new Dimension(0,0));
+//
 
 
         getInputMap().put(KeyStroke.getKeyStroke("BACK_SPACE"), "none");
@@ -190,7 +197,10 @@ public class TextPane extends JTextArea {
                 else{
                     if(str != 0){
                         hexPane.getWorkPane().getjScrollBarV().setValue(str-1);
-                        setCaretPosition(pos);
+                        if(pos == columns)
+                            setCaretPosition(0);
+                        else
+                            setCaretPosition(pos);
                     }
                 }
             }
@@ -212,7 +222,13 @@ public class TextPane extends JTextArea {
 
     public void setVisibleRows(int rows){
         this.rows=rows;
-        this.setRows(rows);
+        setRows(rows);
+    }
+
+    public void setColumnsCount(int columns){
+        this.columns=columns;
+        setColumns(columns);
+
     }
 
 
