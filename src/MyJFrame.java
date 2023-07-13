@@ -39,8 +39,8 @@ public class MyJFrame extends JFrame {
 
 
         setJMenuBar(menu);
-        add(myInfoPane,new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.WEST,GridBagConstraints.VERTICAL,new Insets(1, 1, 1, 1),0,0));
-        add(myworkPane,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
+        add(myInfoPane,new GridBagConstraints(0,0,1,1,0,1,GridBagConstraints.WEST,GridBagConstraints.VERTICAL,new Insets(1, 1, 1, 1),0,0));
+        add(myworkPane,new GridBagConstraints(1,0,1,1,0,1,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
 
 //        add(jScroll,new GridBagConstraints(1,0,1,1,0,1,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
 
@@ -49,7 +49,7 @@ public class MyJFrame extends JFrame {
 //        add(mySearchPane,new GridBagConstraints(2,0,1,1,1,1,GridBagConstraints.EAST,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
 //        add(myFooterPane,new GridBagConstraints(0,1,3,1,0,0,GridBagConstraints.SOUTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
 
-        add(myFooterPane,new GridBagConstraints(0,1,2,1,1,1,GridBagConstraints.SOUTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
+        add(myFooterPane,new GridBagConstraints(0,1,2,1,1,0,GridBagConstraints.SOUTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
 
         setVisible(true);
     }

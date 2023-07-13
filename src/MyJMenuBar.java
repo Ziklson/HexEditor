@@ -100,6 +100,7 @@ public class MyJMenuBar extends JMenuBar {
         JMenu rows=new JMenu("Rows");
         JMenu columns=new JMenu("Columns");
         JMenuItem rowsOther=new JMenuItem("Other");
+        JMenuItem columnsOther=new JMenuItem("Other");
 
         rowsOther.addActionListener(new ActionListener() {
             @Override
@@ -122,9 +123,33 @@ public class MyJMenuBar extends JMenuBar {
                 }
             }
         });
+        columnsOther.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane jOptionPane=new JOptionPane();
+                String i=jOptionPane.showInputDialog(myJFrame,"Select columns count");
+                if(i != null) {
+                    try{
+                        int columnsCount=Integer.parseInt(i);
+                        if(columnsCount <= 0){
+                            actionPerformed(e);
+                        }
+                        else{
+                            myJFrame.getMyworkPane().getHexArea().setColumnsCount(columnsCount);
+                        }
+                    }
+                    catch (NumberFormatException nfe) {
+                        actionPerformed(e);
+                    }
+                }
+            }
+        });
+
+
 
 
         rows.add(rowsOther);
+        columns.add(columnsOther);
 
         view.add(rows);
         view.add(columns);

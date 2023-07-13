@@ -82,7 +82,7 @@ public class WorkPaneCaretListener implements CaretListener {
                 hHex.removeAllHighlights();
                 int posText=textPane.getCaretPosition();
 
-//                System.out.println("posText " + posText);
+                System.out.println("posText " + posText);
                 if(posText*3 != size){
                     try {
                         hHex.addHighlight(posText*3,posText*3+2, DefaultHighlighter.DefaultPainter);
