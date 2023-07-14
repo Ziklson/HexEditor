@@ -17,6 +17,12 @@ public class MyWorkPane extends JPanel {
 
     private Font font;
 
+    public WorkPaneCaretListener getWorkPaneCaretListener() {
+        return workPaneCaretListener;
+    }
+
+    private WorkPaneCaretListener workPaneCaretListener;
+
     private JTextArea columnHeader;
 
     private JTextArea rowHeader;
@@ -115,7 +121,7 @@ public class MyWorkPane extends JPanel {
 
         hexAreaPane.setBackground(new Color(229,228,226));
 
-        WorkPaneCaretListener workPaneCaretListener=new WorkPaneCaretListener(hexArea,textPane);
+        workPaneCaretListener=new WorkPaneCaretListener(hexArea,textPane);
 
         hexArea.addCaretListener(workPaneCaretListener);
         textPane.addCaretListener(workPaneCaretListener);
@@ -176,7 +182,7 @@ public class MyWorkPane extends JPanel {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
 
-                System.out.println("ScVal "+ e.getValue());
+                //System.out.println("ScVal "+ e.getValue());
                 int value = e.getValue();
 
                 updateRowHeader(rows,columns,value);
@@ -219,8 +225,8 @@ public class MyWorkPane extends JPanel {
 
 
 
-        jp.add(hexArea,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-        jp.add(textPane,new GridBagConstraints(2,1,1,1,1,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 10, 1, 1),0,0));
+        jp.add(hexArea,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 0, 0, 0),0,0));
+        jp.add(textPane,new GridBagConstraints(2,1,1,1,1,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 20, 0, 0),0,0));
 
 
         jScroll=new JScrollPane();
@@ -288,19 +294,24 @@ public class MyWorkPane extends JPanel {
     }
 
     public void updateRowHeader(int rows,int columns, int offset){
-        rowHeader.setText("");
-        StringBuilder sb=new StringBuilder("00000000");
-        for(int i=offset,diff=offset*columns;i<offset+rows;i++,diff+=columns){
-            int len=Integer.toHexString(diff).length();
-            sb.replace(8-len,8,Integer.toHexString(diff));
-            if(i != offset+rows-1){
-                rowHeader.append(sb.toString() + "\n");
-            }
+        System.out.println("OFFSET " + offset);
+        if(offset == 0){
+            createRowHeader(rows,columns);
+        }
+        else{
+            rowHeader.setText("");
+            StringBuilder sb=new StringBuilder("00000000");
+            for(int i=offset,diff=offset*columns;i<offset+rows;i++,diff+=columns){
+                int len=Integer.toHexString(diff).length();
+                sb.replace(8-len,8,Integer.toHexString(diff));
+                if(i != offset+rows-1){
+                    rowHeader.append(sb.toString() + "\n");
+                }
 
-            else{
-                rowHeader.append(sb.toString());
+                else{
+                    rowHeader.append(sb.toString());
+                }
             }
-
         }
     }
 
@@ -320,7 +331,7 @@ public class MyWorkPane extends JPanel {
                 }
 //                columnHeader.append("0" + Integer.toHexString(i) + " ");
         }
-        for(int i=0;i<hexArea.getBytes()+1;i++){
+        for(int i=0;i<hexArea.getBytes()+10;i++){
             sb2.append(" ");
         }
         columnHeader.append(sb2.toString());

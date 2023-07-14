@@ -405,6 +405,9 @@ public class HexPane extends JTextArea {
                 else{
                     if(str != 0){
                         workPane.getjScrollBarV().setValue(str-1);
+                        if(pos == 0){
+                            setCaretPosition(1); // Он не хотел регистрировать переход на 0 как событие обновление каретки, пришлось делать такой костыль
+                        }
                         setCaretPosition(pos);
                     }
                 }
@@ -460,7 +463,7 @@ public class HexPane extends JTextArea {
                 infoPane.setFileSizeValueLabel(Long.toString(size));
                 setSymbolsCount((int) size * 3 - 1);
                 setFileSize(size);
-
+                workPane.getjScrollBarV().setVisibleAmount(rows);
                 infoPane.setFileNameValueLabel(curPath.getFileName().toString());
 
                 insertPage(0);
@@ -799,25 +802,29 @@ public class HexPane extends JTextArea {
         textPane.setVisibleRows(rows);
         workPane.setRows(rows);
 
-        readBuffer(workPane.getjScrollBarV().getValue());
+
+        //readBuffer(workPane.getjScrollBarV().getValue());
     }
 
     public void setColumnsCount(int columns){
         setBytes(columns);
         this.columns=3*bytes-1;
         this.setColumns(this.columns);
+        workPane.setColumns(columns);
         if(curPath != null){
             int barSize=(int) getFileSize()/bytes + 1;
+            System.out.println("MAX old " +workPane.getjScrollBarV().getMaximum());
             workPane.setJScrollBarVSize(barSize);
+            System.out.println("MAX new " +workPane.getjScrollBarV().getMaximum());
         }
         textPane.setColumnsCount(columns);
-        workPane.setColumns(columns);
+
 
         //readBuffer(workPane.getjScrollBarV().getValue());
+
         setPreferredSize(new Dimension(0,0));
         textPane.setPreferredSize(new Dimension(0,0));
-        System.out.println("COLUMNS "+ this.getColumns());
-        System.out.println("TextPaneColumns "+textPane.getColumns());
+
     }
 
 }
