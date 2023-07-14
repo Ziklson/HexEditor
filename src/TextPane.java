@@ -191,16 +191,18 @@ public class TextPane extends JTextArea {
                 }
             }
             if (code == KeyEvent.VK_UP) {
-                if (pos > columns) { // заменить на смещение по строкам
-                    setCaretPosition(pos - columns);
+                if (pos >= columns) { // заменить на смещение по строкам
+                        setCaretPosition(pos - columns);
                 }
                 else{
                     if(str != 0){
                         hexPane.getWorkPane().getjScrollBarV().setValue(str-1);
-                        if(pos == columns)
-                            setCaretPosition(0);
-                        else
-                            setCaretPosition(pos);
+                        if(pos == 0){
+                            setCaretPosition(1); // Он не хотел регистрировать переход на 0 как событие обновление каретки, пришлось делать такой костыль
+                        }
+                        setCaretPosition(pos);
+
+
                     }
                 }
             }

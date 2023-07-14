@@ -89,9 +89,19 @@ public class MyJMenuBar extends JMenuBar {
         JMenuItem cut = new JMenuItem("Cut");
         JMenuItem copy = new JMenuItem("Copy");
         JMenuItem paste = new JMenuItem("Paste");
+        JMenuItem find = new JMenuItem("Find");
         edit.add(copy);
         edit.add(cut);
         edit.add(paste);
+        edit.add(find);
+
+        find.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SearchDialog searchDialog=new SearchDialog(myJFrame);
+            }
+        });
+
         return edit;
     }
 
