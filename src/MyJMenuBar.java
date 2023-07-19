@@ -35,7 +35,7 @@ public class MyJMenuBar extends JMenuBar {
                 int i =myFileChooser.showOpenDialog(myJFrame);
                 if(i == 0){
                     Path path = myFileChooser.getSelectedFile().toPath();
-                    myJFrame.getMyworkPane().getHexArea().readFile(path,0,true);
+                    myJFrame.getMyworkPane().getHexArea().readFile(path,0,true,false);
                 }
             }
         });
@@ -51,7 +51,9 @@ public class MyJMenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Path path=myJFrame.getMyworkPane().getHexArea().getCurPath();
-                myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
+                //myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
+                myJFrame.getMyworkPane().getHexArea().test(path,true);
+
             }
         });
 
@@ -66,12 +68,16 @@ public class MyJMenuBar extends JMenuBar {
                     if(path.toFile().exists()){
                         int result = JOptionPane.showConfirmDialog(myJFrame,"Такой файл уже существует! Вы хотите его перезаписать?","Save",JOptionPane.YES_NO_OPTION);
                         if(result == 0)
-                            myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
+                            //myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
+                            myJFrame.getMyworkPane().getHexArea().test(path,true);
+
                         else
                             actionPerformed(e);
                     }
                     else
-                        myJFrame.getMyworkPane().getHexArea().saveAs(path,false);
+                        //myJFrame.getMyworkPane().getHexArea().saveAs(path,false);
+                        myJFrame.getMyworkPane().getHexArea().test(path,false);
+
                 }
             }
         });

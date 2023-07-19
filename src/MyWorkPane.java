@@ -6,7 +6,7 @@ import java.awt.event.AdjustmentListener;
 public class MyWorkPane extends JPanel {
 
 
-
+    private MyJFrame myJFrame;
 
     private HexPane hexArea;
 
@@ -78,10 +78,11 @@ public class MyWorkPane extends JPanel {
     private int columns;
 
 
-    MyWorkPane() {
+    MyWorkPane(MyJFrame myJFrame) {
         super();
+        this.myJFrame=myJFrame;
         setLayout(new GridBagLayout());
-        hexArea=new HexPane(this);
+        hexArea=new HexPane(this,myJFrame);
         hexAreaPane=new JPanel();
         textPane=new TextPane(hexArea);
 
@@ -170,7 +171,8 @@ public class MyWorkPane extends JPanel {
 
        // jScrollBarV.setMinimum(0);
         //jScrollBarV.setMaximum(200);
-        jScrollBarV.setUnitIncrement(100);
+        jScrollBarV.setUnitIncrement(1);
+        jScrollBarV.setBlockIncrement(1);
 
 //        jScrollBarV.setUnitIncrement(1);
 
@@ -294,7 +296,7 @@ public class MyWorkPane extends JPanel {
     }
 
     public void updateRowHeader(int rows,int columns, int offset){
-        System.out.println("OFFSET " + offset);
+        //System.out.println("OFFSET " + offset);
         if(offset == 0){
             createRowHeader(rows,columns);
         }

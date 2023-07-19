@@ -27,17 +27,25 @@ public class MySearchPane extends JPanel {
     private JButton downButton;
     private JLabel searchLabel;
     private Font font;
+    private JLabel result;
 
     private HexPane hexPane;
 
     private int columns;
     private boolean inserting;
 
+    private int curByte;
+    private int lastInd;
+    private String strFound;
+
 
 
     MySearchPane(HexPane hexPane) {
         super();
         this.hexPane=hexPane;
+        curByte=0;
+        strFound="";
+        lastInd=0;
         font=new Font(Font.MONOSPACED, Font.PLAIN,16);
         inserting=false;
         symbolsCount=0;
@@ -48,11 +56,13 @@ public class MySearchPane extends JPanel {
         searchArea.setRows(4);
         searchArea.setLineWrap(true);
         searchArea.setWrapStyleWord(true);
-//        JPanel jp=new JPanel();
-//        jp.add(searchArea);
         searchAreaPane=new JScrollPane(searchArea);
         searchAreaPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         searchLabel=new JLabel("Search");
+
+        result=new JLabel("Result");
+        result.setFont(font);
+
         searchLabel.setFont(font);
         searchArea.setFont(font);
         searchArea.addKeyListener(new SearchKeyListener());
@@ -64,7 +74,18 @@ public class MySearchPane extends JPanel {
         downButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println(searchArea.getText());
+                hexPane.getHighlighter().removeAllHighlights();
+                hexPane.getTextPane().getHighlighter().removeAllHighlights();
+                search(searchArea.getText(),0);
+            }
+        });
+
+        upButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                hexPane.getHighlighter().removeAllHighlights();
+                hexPane.getTextPane().getHighlighter().removeAllHighlights();
+                search(searchArea.getText(),1);
             }
         });
 
@@ -80,6 +101,9 @@ public class MySearchPane extends JPanel {
         searchPanel.add(upButton,new GridBagConstraints(0,2,2,1,0,0,GridBagConstraints.EAST,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
 
         searchPanel.add(downButton,new GridBagConstraints(2,2,1,1,0,0,GridBagConstraints.EAST,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
+
+        searchPanel.add(result,new GridBagConstraints(0,3,4,1,0,0,GridBagConstraints.EAST,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
+
 
         searchPanel.setBackground(new Color(255, 229, 229));
         setLayout(new GridBagLayout());
@@ -252,4 +276,30 @@ public class MySearchPane extends JPanel {
             }
         }
     }
+
+
+   public void search(String str,int direction){
+            if(!strFound.equals(str)){
+                strFound=str;
+                hexPane.setLastIndFound(-1);
+                System.out.println("Я обнулил индекс!");
+            }
+            String[] arr=str.split(" ");
+            byte[] searchArr=new byte[arr.length];
+            for(int i=0;i<searchArr.length;i++){
+                searchArr[i]=(byte) Integer.parseInt(arr[i],16);
+            }
+            result.setText("Result: in process");
+            int k=hexPane.search(searchArr,direction,curByte); // 0 -direction down 1 - direction up;
+
+            if(k==-1){
+                result.setForeground(new Color(147, 24, 24));
+                result.setText("Result: not found");
+            }
+            else{
+                result.setForeground(new Color(15, 147, 15));
+                result.setText("Result: found");
+            }
+    }
+
 }

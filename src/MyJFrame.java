@@ -9,6 +9,11 @@ public class MyJFrame extends JFrame {
 
     private MyWorkPane myworkPane;
     private MySearchPane mySearchPane;
+
+    public MyFooterPane getMyFooterPane() {
+        return myFooterPane;
+    }
+
     private MyFooterPane myFooterPane;
 
 
@@ -25,7 +30,7 @@ public class MyJFrame extends JFrame {
 
         myInfoPane=new MyInfoPane();
         myFooterPane=new MyFooterPane();
-        myworkPane=new MyWorkPane();
+        myworkPane=new MyWorkPane(this);
 //        mySearchPane=new MySearchPane();
         menu=new MyJMenuBar(this);
 

@@ -12,7 +12,7 @@ public class SearchDialog {
     public JDialog createDialog(String str, boolean mode){
             searchDialog=new JDialog(myJFrame,str,mode);
             searchDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-            searchDialog.setMinimumSize(new Dimension(270,200));
+            searchDialog.setMinimumSize(new Dimension(270,225));
             searchDialog.setLocationRelativeTo(null);
             searchDialog.setResizable(false);
             MySearchPane mySearchPane=new MySearchPane(myJFrame.getMyworkPane().getHexArea());
