@@ -38,6 +38,8 @@ public class MySearchPane extends JPanel {
     private int lastInd;
     private String strFound;
 
+    private int curDirection;
+
 
 
     MySearchPane(HexPane hexPane) {
@@ -279,10 +281,14 @@ public class MySearchPane extends JPanel {
 
 
    public void search(String str,int direction){
+//            if(curDirection != direction){
+//                curDirection=direction;
+//                hexPane.setLastIndFound(-1);
+//            }
             if(!strFound.equals(str)){
                 strFound=str;
-                hexPane.setLastIndFound(-1);
-                System.out.println("Я обнулил индекс!");
+//                hexPane.setLastIndFound(-1);
+//                System.out.println("Я обнулил индекс!");
             }
             String[] arr=str.split(" ");
             byte[] searchArr=new byte[arr.length];
@@ -295,6 +301,7 @@ public class MySearchPane extends JPanel {
             if(k==-1){
                 result.setForeground(new Color(147, 24, 24));
                 result.setText("Result: not found");
+//                hexPane.setLastIndFound(-1);
             }
             else{
                 result.setForeground(new Color(15, 147, 15));

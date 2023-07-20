@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 public class MyWorkPane extends JPanel {
 
@@ -174,6 +176,7 @@ public class MyWorkPane extends JPanel {
         jScrollBarV.setUnitIncrement(1);
         jScrollBarV.setBlockIncrement(1);
 
+
 //        jScrollBarV.setUnitIncrement(1);
 
 //        jScrollBarV.setVisibleAmount(1);
@@ -209,19 +212,7 @@ public class MyWorkPane extends JPanel {
             cl.append("0");
         }
 
-//        JTextArea cl2=new JTextArea();
-//        cl2.setEditable(false);
-//        cl2.setFont(font);
-//        cl2.setBackground(new Color(229,228,226));
-//        cl2.setForeground(new Color(255,0,0));
-//        for(int i=0;i<columns;i++){
-//            cl2.append(" ");
-//        }
-//        cl2.setText("                ");
-///
 
-
-///////////////
         JPanel jp=new JPanel();
         jp.setLayout(new GridBagLayout());
 
@@ -244,6 +235,19 @@ public class MyWorkPane extends JPanel {
         jScroll.setColumnHeader(jv2);
 
         jScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+        jScroll.removeMouseWheelListener(jScroll.getMouseWheelListeners()[0]);
+
+        jScroll.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if(e.getWheelRotation() > 0){
+                    jScrollBarV.setValue(jScrollBarV.getValue()+1);
+                }
+                else{
+                    jScrollBarV.setValue(jScrollBarV.getValue()-1);
+                }
+            }
+        });
 
 
 

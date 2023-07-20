@@ -43,8 +43,12 @@ public class WorkPaneCaretListener implements CaretListener {
             Document doc=hexPane.getDocument();
             String strAtPos = "";
 
-            hText.removeAllHighlights();
-            hHex.removeAllHighlights();
+//            hText.removeAllHighlights();
+            //hHex.removeAllHighlights();
+            if(hexPane.getCaretHigh() != null)
+                hHex.removeHighlight(hexPane.getCaretHigh());
+            if(textPane.getCaretHigh() != null)
+                hText.removeHighlight(textPane.getCaretHigh());
 
 //            System.out.println("CaretPosHex" + posHex);
 //
@@ -52,18 +56,21 @@ public class WorkPaneCaretListener implements CaretListener {
         if (posHex != size) { // Чтобы не было бага с переносом новой строки
                 try {
                     if (posHex % 3 == 0) {
-                        hHex.addHighlight(posHex, posHex + 2, DefaultHighlighter.DefaultPainter);
+                        hexPane.setCaretHigh(hHex.addHighlight(posHex, posHex + 2, DefaultHighlighter.DefaultPainter));
+                        //hHex.addHighlight(posHex, posHex + 2, DefaultHighlighter.DefaultPainter);
                         strAtPos = doc.getText(posHex, 2);
                         if(strAtPos.charAt(1) != ' ')
                             hexPane.getInfoPane().setByteValueLabel(strAtPos);
                     }
                     if (posHex % 3 == 1) {
-                        hHex.addHighlight(posHex - 1, posHex+1, DefaultHighlighter.DefaultPainter);
+//                        hHex.addHighlight(posHex - 1, posHex+1, DefaultHighlighter.DefaultPainter);
+                        hexPane.setCaretHigh(hHex.addHighlight(posHex - 1, posHex+1, DefaultHighlighter.DefaultPainter));
                         strAtPos = doc.getText(posHex - 1, 2);
                         if(strAtPos.charAt(1) != ' ')
                             hexPane.getInfoPane().setByteValueLabel(strAtPos);
                     }
-                    hText.addHighlight(posHex/3, posHex/3+1, DefaultHighlighter.DefaultPainter);
+//                    hText.addHighlight(posHex/3, posHex/3+1, DefaultHighlighter.DefaultPainter);
+                    textPane.setCaretHigh(hText.addHighlight(posHex/3, posHex/3+1, DefaultHighlighter.DefaultPainter));
 
                 } catch (BadLocationException ex) {
                     ex.printStackTrace();
@@ -78,14 +85,16 @@ public class WorkPaneCaretListener implements CaretListener {
                 Document doc=hexPane.getDocument();
                 String strAtPos = "0";
                 int size=hexPane.getSymbolsCount();
-                hText.removeAllHighlights();
-                hHex.removeAllHighlights();
+                if(hexPane.getCaretHigh() != null)
+                    hHex.removeHighlight(hexPane.getCaretHigh());
+                if(textPane.getCaretHigh() != null)
+                    hText.removeHighlight(textPane.getCaretHigh());
                 int posText=textPane.getCaretPosition();
 
                 if(posText*3 != size){
                     try {
-                        hHex.addHighlight(posText*3,posText*3+2, DefaultHighlighter.DefaultPainter);
-                        hText.addHighlight(posText, posText+ 1, DefaultHighlighter.DefaultPainter);
+                        hexPane.setCaretHigh(hHex.addHighlight(posText*3,posText*3+2, DefaultHighlighter.DefaultPainter));
+                        textPane.setCaretHigh(hText.addHighlight(posText, posText+ 1, DefaultHighlighter.DefaultPainter));
                         strAtPos = doc.getText(posText*3, 2);
                         if(strAtPos.charAt(0) != ' ')
                             hexPane.getInfoPane().setByteValueLabel(strAtPos);
