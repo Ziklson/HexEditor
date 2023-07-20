@@ -1,15 +1,11 @@
 import javax.swing.*;
 
-import javax.swing.text.BadLocationException;
-
-import javax.swing.text.DefaultCaret;
-import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.Document;
+import javax.swing.text.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
@@ -141,6 +137,7 @@ public class HexPane extends JTextArea {
 
     private List<Byte> byteArr;
 
+    private Font font;
     public int getSymbolsCount() {
         return symbolsCount;
     }
@@ -149,8 +146,47 @@ public class HexPane extends JTextArea {
         this.symbolsCount = size;
     }
 
+    public Object getMouseHigh() {
+        return mouseHigh;
+    }
+
+    public void setMouseHigh(Object mouseHigh) {
+        this.mouseHigh = mouseHigh;
+    }
+
+    private Object mouseHigh;
+
+    public Object getCaretHigh() {
+        return caretHigh;
+    }
+
+    public void setCaretHigh(Object caretHigh) {
+        this.caretHigh = caretHigh;
+    }
+
+    private Object caretHigh;
+
+    public Object getSearchHigh() {
+        return searchHigh;
+    }
+
+    public void setSearchHigh(Object searchHigh) {
+        this.searchHigh = searchHigh;
+    }
+
+    private Object searchHigh;
+
+
     HexPane(MyWorkPane workPane, MyJFrame myJFrame) {
         super();
+        //
+        font=new Font(Font.MONOSPACED, Font.PLAIN,22);
+        int charW=getFontMetrics(font).charWidth(' ');
+        int charH=getFontMetrics(font).getHeight();
+//        hMouse=new DefaultHighlighter.DefaultHighlightPainter(Color.GRAY);
+
+
+//
         this.myJFrame=myJFrame;
         setInserting(false);
         setBufferChanged(false);
@@ -167,6 +203,7 @@ public class HexPane extends JTextArea {
         prox=rows*4;
         byteBuffer=new byte[64000];
         byteArr=new ArrayList<Byte>();
+
         limit_file_per_dir=byteBuffer.length/2 * 400; // Ограничиваем по 400 файлов в одной dir
         setColumns(columns);
         symbolsCount = 0;
@@ -225,6 +262,39 @@ public class HexPane extends JTextArea {
         getActionMap().put("doNothing",
                 doNothing);
 
+
+        addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                //setInserting(true);
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int x=e.getX();
+                int y=e.getY();
+                if(x % (3*charW) < 2*charW){
+                    int xPos=x/charW;
+                    int yPos=(y/charH)*(columns+1);
+                    xPos+=yPos;
+                    try {
+                        if(mouseHigh != null)
+                            getHighlighter().removeHighlight(mouseHigh);
+                        if(textPane.getMouseHigh() != null)
+                            textPane.getHighlighter().removeHighlight(textPane.getMouseHigh());
+                        if(xPos % 3 == 0){
+                            mouseHigh=getHighlighter().addHighlight(xPos,xPos+2,new DefaultHighlighter.DefaultHighlightPainter(new Color(198, 237, 248)));
+                        }
+                        if(xPos % 3 == 1){
+                            mouseHigh=getHighlighter().addHighlight(xPos - 1,xPos+1,new DefaultHighlighter.DefaultHighlightPainter(new Color(198, 237, 248)));
+                        }
+                        textPane.setMouseHigh(textPane.getHighlighter().addHighlight(xPos/3,xPos/3+1,new DefaultHighlighter.DefaultHighlightPainter(new Color(198, 237, 248))));
+                    } catch (BadLocationException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
 
     }
 
@@ -456,6 +526,7 @@ public class HexPane extends JTextArea {
         if(firstRead){
             try(RandomAccessFile raf=new RandomAccessFile(path.toString(),"r")){
                 long size=raf.length();
+                byteArr.clear();
 
                 Arrays.fill(byteBuffer,(byte) 0);
 
@@ -517,7 +588,6 @@ public class HexPane extends JTextArea {
                         }
 
                         if(buffFullness == byteBuffer.length){
-                            //buffFullness=0;
                             if(!saving){
                                 byteArr = IntStream.range(0, buffFullness).mapToObj(i -> byteBuffer[i]).collect(Collectors.toList());
                                 insertPage(workPane.getjScrollBarV().getValue()*bytes - startBuff);
@@ -736,14 +806,13 @@ public class HexPane extends JTextArea {
     }
 
     public boolean isTempFileExist(int fileName){ // fileName - startBuf + b + .tmp
-//        StringBuilder path = new StringBuilder();
-//        path.append(curDir.toString());
-//        path.append("\\tmp\\");
-//        path.append(fileName / limit_file_per_dir);
-//        path.append("\\" + fileName + "b.tmp");
-
-        return false;
-        //return Files.exists(Paths.get(path.toString()), LinkOption.NOFOLLOW_LINKS);
+        StringBuilder path = new StringBuilder();
+        path.append(curDir.toString());
+        path.append("\\tmp\\");
+        path.append(fileName / limit_file_per_dir);
+        path.append("\\" + fileName + "b.tmp");
+//        return false;
+        return Files.exists(Paths.get(path.toString()), LinkOption.NOFOLLOW_LINKS);
     }
 
     public Path getTempFile(int fileName){
@@ -941,24 +1010,17 @@ public class HexPane extends JTextArea {
 //    public int search(byte[] searchArr,int direction,boolean firstSearch,int pos_start,int startBuff){ // 0 direction down, 1 - direction up
     public int search(byte[] searchArr,int direction,int pos_start){ // 0 direction down, 1 - direction up
         int str=getWorkPane().getjScrollBarV().getValue();
-        //int curBuff=startBuff;
-
-        //int pos=str*bytes-curBuff+pos_start;
-
-        System.out.println("STARTBUF " + startBuff);
-        int curBuff=(str*bytes/byteBuffer.length) * byteBuffer.length;
-
-        System.out.println("CurBuff " + curBuff);
+        int curBuff=((str*bytes)/byteBuffer.length) * byteBuffer.length;
 
 
         if(curBuff != startBuff){
+            buffFullness=0;
             readFile(curPath,curBuff,false,true);
         }
 
         int pos=(str*bytes)%byteBuffer.length;
-        System.out.println("pos " + pos);
-
-
+        if(lastIndFound != -1)
+            pos=lastIndFound;
 
 
         boolean find;
@@ -967,21 +1029,19 @@ public class HexPane extends JTextArea {
         if(direction == 0){
             offset=byteBuffer.length;
             offset2=1;
-            pos=(str*bytes)%byteBuffer.length;
+//            pos=(str*bytes)%byteBuffer.length;
         }
         else{
             offset=-byteBuffer.length;
             offset2=-1;
-            pos=((str+rows)*bytes)%byteBuffer.length;
+//            pos=((str+rows)*bytes)%byteBuffer.length;
         }
 
-
-//        if(direction == 0){
             for(int cb=curBuff;cb<getFileSize() && cb>=0;cb+=offset){
                 find=true;
                 for(int p=pos;p<buffFullness && p>=0;p+=offset2){
                     int p2=p;
-                    if(lastIndFound != -1 && ((p <= lastIndFound && direction == 0) || (p>=lastIndFound && direction == 1))) {
+                    if((lastIndFound != -1) && ((p <= lastIndFound && direction == 0) || (p>=lastIndFound && direction == 1))) {
                         continue;
                     }
                     for(int p3=0;p3<searchArr.length;p3++){
@@ -999,15 +1059,21 @@ public class HexPane extends JTextArea {
                     }
                     if(find){
                         lastIndFound=p;
+                        System.out.println("P " +p);
                         getWorkPane().getjScrollBarV().setValue((p+curBuff)/bytes);
                         try {
                             setCaretPosition((p%bytes)*3);
-                            getHighlighter().addHighlight((p%bytes)*3,(p%bytes)*3+2, DefaultHighlighter.DefaultPainter);
-                            textPane.getHighlighter().addHighlight((p%bytes),(p%bytes)+1,DefaultHighlighter.DefaultPainter);
+                            if(searchHigh != null)
+                                getHighlighter().removeHighlight(searchHigh);
+
+                            if(textPane.getSearchHigh() != null)
+                                textPane.getHighlighter().removeHighlight(textPane.getSearchHigh());
+
+                            setSearchHigh(getHighlighter().addHighlight((p%bytes)*3,(p%bytes)*3+2, new DefaultHighlighter.DefaultHighlightPainter(new Color(248, 198, 198))));
+                            textPane.setSearchHigh(textPane.getHighlighter().addHighlight((p%bytes),(p%bytes)+1,new DefaultHighlighter.DefaultHighlightPainter(new Color(248, 198, 198))));
                         } catch (BadLocationException e) {
                             e.printStackTrace();
                         }
-                        //return p%bytes;
                         return 1;
                     }
                     else{
@@ -1015,10 +1081,10 @@ public class HexPane extends JTextArea {
                     }
                 }
                 if((curBuff + buffFullness < getFileSize() && direction==0) || (direction==1 && curBuff>=0)){
-                    buffFullness=0;
                     curBuff+=offset;
                     if(curBuff<0)
                         return -1;
+                    buffFullness=0;
                     readFile(curPath,curBuff,false,true);
                     if(direction==0)
                         pos=0;
@@ -1030,118 +1096,12 @@ public class HexPane extends JTextArea {
                     return -1;
                 }
             }
-//        }
-//        else{
-//
-//        }
         return -1;
-//        int pos;
-//        boolean find=false;
-//
-//        int curBuff=startBuff;
-//        if(firstSearch){
-//            int str=getWorkPane().getjScrollBarV().getValue();
-//            curBuff=this.startBuff;
-//            pos=str*bytes - curBuff + pos_start;
-//            System.out.println("StartBuff "+ this.startBuff);
-//        }
-//        else
-//        {
-//            pos=pos_start;
-//        }
-//
-//        if(direction == 0){
-//            for(int i=pos;i<buffFullness;i++){
-//                int m=i;
-//                find=true;
-//                for(int k=0;k<searchArr.length;k++){
-//                    if (m < buffFullness - searchArr.length) {
-//                        if (searchArr[k] == byteBuffer[m]) {
-//                            m++;
-//                            continue;
-//                        } else {
-//                            find = false;
-//                            break;
-//                        }
-//                    } else {
-//                        find = false;
-//                    }
-//                }
-//                if(find){
-//                    for(int l=i,s=0;s<searchArr.length;l++,s++){
-//                        System.out.println(byteBuffer[l] + " " + searchArr[s]);
-//                    }
-//                    getWorkPane().getjScrollBarV().setValue(i/bytes + curBuff/bytes);
-//                    System.out.println("Нашел на " +i/bytes + curBuff/bytes + " строке");
-//                    System.out.println("Это " + i%bytes + " байт");
-//                    try {
-//                        setCaretPosition((i%bytes)*3);
-//                        getHighlighter().addHighlight((i%bytes)*3,(i%bytes)*3+2, DefaultHighlighter.DefaultPainter);
-//                        textPane.getHighlighter().addHighlight((i%bytes),(i%bytes)+1,DefaultHighlighter.DefaultPainter);
-//                    } catch (BadLocationException e) {
-//                        e.printStackTrace();
-//                    }
-//                    return i%bytes;
-//                }
-//            }
-//            if(curBuff + buffFullness < getFileSize()){
-//                buffFullness=0;
-//                System.out.println("Я здесь! " + curBuff);
-//                readFile(curPath,curBuff+byteBuffer.length/2,false,true);
-//                int result=search(searchArr,0,false,0,curBuff+byteBuffer.length/2);
-//                return result;
-//            }
-//            else
-//            {
-//                System.out.println("Не найдено!");
-//                return -1;
-//            }
-//        }
-//        else{
-//            for(int i=pos;i>=0;i--){
-//                int m=i;
-//                find=true;
-//                for(int k=0;k<searchArr.length;k++) {
-//                    if (m < buffFullness - searchArr.length) {
-//                        if (searchArr[k] == byteBuffer[m]) {
-//                            m++;
-//                            continue;
-//                        } else {
-//                            find = false;
-//                            break;
-//                        }
-//                    } else {
-//                        find = false;
-//                    }
-//                }
-//                if(find){
-//                        for(int l=i,s=0;s<searchArr.length;l++,s++){
-//                            System.out.println(byteBuffer[l] + " " + searchArr[s]);
-//                        }
-//                        getWorkPane().getjScrollBarV().setValue(i/bytes + curBuff/bytes);
-//                        System.out.println("Нашел на " +i/bytes + curBuff/bytes + " строке");
-//                        System.out.println("Это " + i%bytes + " байт");
-//                        try {
-//                            setCaretPosition((i%bytes)*3);
-//                            getHighlighter().addHighlight((i%bytes)*3,(i%bytes)*3+2, DefaultHighlighter.DefaultPainter);
-//                            textPane.getHighlighter().addHighlight((i%bytes),(i%bytes)+1,DefaultHighlighter.DefaultPainter);
-//                        } catch (BadLocationException e) {
-//                            e.printStackTrace();
-//                        }
-//                        return i%bytes;
-//                    }
-//            }
-//            if(curBuff != 0){
-//                buffFullness=0;
-//                System.out.println("Я здесь! " + curBuff);
-//                readFile(curPath,curBuff-byteBuffer.length/2,false,true);
-//                int result=search(searchArr,1,false,buffFullness,curBuff-byteBuffer.length/2);
-//                return result;
-//            }
-//            else{
-//                System.out.println("Не найдено!");
-//                return -1;
-//            }
-//        }
     }
+
+    public void insert(){
+        Clipboard clipboard=Toolkit.getDefaultToolkit().getSystemClipboard();
+
+    }
+
 }

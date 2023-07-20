@@ -2,10 +2,9 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.DefaultHighlighter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 
 public class TextPane extends JTextArea {
 
@@ -17,9 +16,44 @@ public class TextPane extends JTextArea {
     private Font font;
     private final HexPane hexPane;
 
+    public Object getMouseHigh() {
+        return mouseHigh;
+    }
+
+    public void setMouseHigh(Object mouseHigh) {
+        this.mouseHigh = mouseHigh;
+    }
+
+    private Object mouseHigh;
+
+    public Object getCaretHigh() {
+        return caretHigh;
+    }
+
+    public void setCaretHigh(Object caretHigh) {
+        this.caretHigh = caretHigh;
+    }
+
+    private Object caretHigh;
+
+    public Object getSearchHigh() {
+        return searchHigh;
+    }
+
+    public void setSearchHigh(Object searchHigh) {
+        this.searchHigh = searchHigh;
+    }
+
+    private Object searchHigh;
+
 
     TextPane(HexPane hexPane) {
         super();
+        //
+        font=new Font(Font.MONOSPACED, Font.PLAIN,22);
+        int charW=getFontMetrics(font).charWidth(' ');
+        int charH=getFontMetrics(font).getHeight();
+        //
         this.hexPane=hexPane;
         columns=hexPane.getBytes();
         rows=hexPane.getRows();
@@ -72,6 +106,32 @@ public class TextPane extends JTextArea {
                 doNothing);
 
 
+
+        addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int x=e.getX();
+                int y=e.getY();
+                int xPos=x/charW;
+                int yPos=(y/charH)*(hexPane.getBytes());
+                xPos+=yPos;
+                try {
+                    if(hexPane.getMouseHigh() != null)
+                        hexPane.getHighlighter().removeHighlight(hexPane.getMouseHigh());
+                    if(getMouseHigh() != null)
+                        getHighlighter().removeHighlight(getMouseHigh());
+                    setMouseHigh(getHighlighter().addHighlight(xPos,xPos+1,new DefaultHighlighter.DefaultHighlightPainter(new Color(198, 237, 248))));
+                    hexPane.setMouseHigh(hexPane.getHighlighter().addHighlight(xPos*3,xPos*3+2,new DefaultHighlighter.DefaultHighlightPainter(new Color(198, 237, 248))));
+                } catch (BadLocationException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
 
 
     }
