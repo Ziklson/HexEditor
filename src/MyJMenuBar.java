@@ -51,8 +51,7 @@ public class MyJMenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Path path=myJFrame.getMyworkPane().getHexArea().getCurPath();
-                //myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
-                myJFrame.getMyworkPane().getHexArea().test(path,true);
+                myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
 
             }
         });
@@ -68,15 +67,13 @@ public class MyJMenuBar extends JMenuBar {
                     if(path.toFile().exists()){
                         int result = JOptionPane.showConfirmDialog(myJFrame,"Такой файл уже существует! Вы хотите его перезаписать?","Save",JOptionPane.YES_NO_OPTION);
                         if(result == 0)
-                            //myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
-                            myJFrame.getMyworkPane().getHexArea().test(path,true);
+                            myJFrame.getMyworkPane().getHexArea().saveAs(path,true);
 
                         else
                             actionPerformed(e);
                     }
                     else
-                        //myJFrame.getMyworkPane().getHexArea().saveAs(path,false);
-                        myJFrame.getMyworkPane().getHexArea().test(path,false);
+                        myJFrame.getMyworkPane().getHexArea().saveAs(path,false);
 
                 }
             }
@@ -94,17 +91,31 @@ public class MyJMenuBar extends JMenuBar {
         JMenu edit = new JMenu("Edit");
         JMenuItem cut = new JMenuItem("Cut");
         JMenuItem copy = new JMenuItem("Copy");
-        JMenuItem paste = new JMenuItem("Paste");
+        JMenu paste = new JMenu("Paste");
         JMenuItem find = new JMenuItem("Find");
         edit.add(copy);
         edit.add(cut);
         edit.add(paste);
         edit.add(find);
 
+        JMenuItem pasteOver=new JMenuItem("Overwrite the bytes at cursor position");
+        JMenuItem pasteIns=new JMenuItem("Insert the bytes at cursor position");
+
+        paste.add(pasteOver);
+        paste.add(pasteIns);
+
+
         find.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SearchDialog searchDialog=new SearchDialog(myJFrame);
+            }
+        });
+
+        pasteOver.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                myJFrame.getMyworkPane().getHexArea().insert();
             }
         });
 
