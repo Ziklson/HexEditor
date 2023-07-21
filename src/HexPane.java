@@ -3,8 +3,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -728,7 +727,7 @@ public class HexPane extends JTextArea {
         return tempFile;
     }
 
-    public void saveBuffer(int offset){
+    public void saveBuffer(int offset){ //offset == startBuffer
         int dirNumb=startBuff/limit_file_per_dir;
 
         int size=byteArr.size();
@@ -823,64 +822,6 @@ public class HexPane extends JTextArea {
         path.append("\\" + fileName + "b.tmp");
         return Paths.get(path.toString());
     }
-
-
-//    public void saveAs(Path path, boolean overwrite){
-//
-//
-//
-//        long size = getFileSize();
-//        long pos=0;
-//        int curStartBuf=startBuff;
-//        int bufActSize=0;
-//        System.out.println("SIIZE " +size);
-//
-//
-//        if(!overwrite){
-//            try {
-//                Files.createFile(path);
-//            } catch (IOException ex){
-//                System.err.println(ex);
-//            }
-//        }
-//
-//
-//        try(RandomAccessFile raf = new RandomAccessFile(path.toString(), "rw")){
-//
-//
-//            long start_time=System.nanoTime();
-//
-//            for(int i=0;i<size;i+=byteBuffer.length){
-//                pr=i;
-//                if(i != curStartBuf){
-//                    readFile(curPath,i,false,true);
-//                    bufActSize=buffFullness;
-//                }
-//                else{
-//                    for(int k=0;k<buffFullness;k++){
-//                        byteBuffer[k]=byteArr.get(k);
-//                    }
-//                    bufActSize=byteArr.size();
-//                }
-//                raf.seek(pos);
-//                raf.write(byteBuffer,0,bufActSize);
-//                pos+=bufActSize;
-//                buffFullness=0;
-//                byteArr.clear();
-//                System.out.println("Записано "+ i/(size/100)+ "%");
-//            }
-//            raf.setLength(size);
-//            long end_time=System.nanoTime();
-//            long result_time=(end_time-start_time)/1000000;
-//            System.out.println("Запись окончена " + result_time);
-//        }catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//        } catch (IOException e) {
-//                e.printStackTrace();
-//        }
-//        readFile(curPath,curStartBuf,false,false);
-//    }
-
 
 
     public void setVisibleRows(int rows){
@@ -985,7 +926,7 @@ public class HexPane extends JTextArea {
     }
 
 
-    public void test(Path path,boolean overwrite){
+    public void saveAs(Path path,boolean overwrite){
         ProgressWorker pw = new ProgressWorker(path,overwrite);
         pw.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -1007,7 +948,6 @@ public class HexPane extends JTextArea {
         pw.execute();
     }
 
-//    public int search(byte[] searchArr,int direction,boolean firstSearch,int pos_start,int startBuff){ // 0 direction down, 1 - direction up
     public int search(byte[] searchArr,int direction,int pos_start){ // 0 direction down, 1 - direction up
         int str=getWorkPane().getjScrollBarV().getValue();
         int curBuff=((str*bytes)/byteBuffer.length) * byteBuffer.length;
@@ -1059,7 +999,6 @@ public class HexPane extends JTextArea {
                     }
                     if(find){
                         lastIndFound=p;
-                        System.out.println("P " +p);
                         getWorkPane().getjScrollBarV().setValue((p+curBuff)/bytes);
                         try {
                             setCaretPosition((p%bytes)*3);
@@ -1101,7 +1040,99 @@ public class HexPane extends JTextArea {
 
     public void insert(){
         Clipboard clipboard=Toolkit.getDefaultToolkit().getSystemClipboard();
+        DataFlavor flavor =DataFlavor.stringFlavor;
+        int caretPosition=0;
+        int pos=0;
+        int curBuffer=startBuff;
+        if(clipboard.isDataFlavorAvailable(flavor)){
+            try {
+                String[] ins= clipboard.getData(flavor).toString().split("");
+                int str=workPane.getjScrollBarV().getValue();
 
+                if(workPane.getLastFocus() == 0){
+                    caretPosition = getCaretPosition();
+                    pos=str*bytes + (caretPosition/3)-startBuff;
+                }
+                else{
+                    if(workPane.getLastFocus() == 1){
+                        caretPosition=textPane.getCaretPosition();
+                        pos=str*bytes+caretPosition-startBuff;
+                    }
+                    else{
+                        System.out.println("No Focus");
+                        return;
+                    }
+                }
+                if(ins.length < getFileSize() - str*bytes+caretPosition){
+                    for(int i=0;i<ins.length;i++){
+                        if(pos < buffFullness){
+                            //System.out.println("Я работаю?! Pos " + pos);
+                            Byte b= ins[i].getBytes()[0];
+                            byteArr.set(pos,b);
+                            pos++;
+                        }
+                        else{
+                            saveBuffer(curBuffer);
+                            curBuffer+=byteBuffer.length;
+                            System.out.println("Я хочу прочитать след буффер! " + curBuffer);
+                            buffFullness=0;
+                            byteArr.clear();
+                            readFile(curPath,curBuffer,false,false);
+                            pos=0;
+                        }
+                    }
+
+
+                    if(curBuffer != startBuff){
+                        saveBuffer(curBuffer);
+
+                        System.out.println("Я загружаю startBuffer!" + startBuff);
+                        buffFullness=0;
+                        byteArr.clear();
+                        readFile(curPath,startBuff,false,false);
+
+                    }
+
+
+
+                    insertPage(str*bytes - startBuff);
+
+                    if(workPane.getLastFocus() == 0)
+                        setCaretPosition(caretPosition);
+                    else
+                        textPane.setCaretPosition(caretPosition);
+                }
+                else{
+                    System.out.println("Я не работаю!");
+                }
+
+//                if(pos < buffFullness-ins.length){
+//                    for(int i=0;i<ins.length;i++){
+//                        Byte b= ins[i].getBytes()[0];
+//                        byteArr.set(pos,b);
+//                        pos++;
+//                    }
+//                    insertPage(str*bytes - startBuff);
+//                    if(workPane.getLastFocus() == 0)
+//                        setCaretPosition(caretPosition);
+//                    else
+//                        textPane.setCaretPosition(caretPosition);
+//                }
+//                else{
+//                    for(int i=0;i<buffFullness-ins.length;i++){
+//                        Byte b= ins[i].getBytes()[0];
+//                        byteArr.set(pos,b);
+//                        pos++;
+//                    }
+//                    saveBuffer(startBuff);
+//                }
+
+            } catch (UnsupportedFlavorException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }

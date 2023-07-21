@@ -14,6 +14,16 @@ public class MyWorkPane extends JPanel {
 
     private JScrollPane jScrollPane;
 
+    public int getLastFocus() {
+        return lastFocus;
+    }
+
+    public void setLastFocus(int lastFocus) {
+        this.lastFocus = lastFocus;
+    }
+
+    private int lastFocus; // if 0 ==> last focus was on HexPane, if 1 ==> on TextPane, if ==> -1 none of them
+
 
     private JPanel hexAreaPane;
 
@@ -87,7 +97,7 @@ public class MyWorkPane extends JPanel {
         hexArea=new HexPane(this,myJFrame);
         hexAreaPane=new JPanel();
         textPane=new TextPane(hexArea);
-
+        lastFocus=-1;
         rows=hexArea.getRows();
         columns=hexArea.getBytes();
 

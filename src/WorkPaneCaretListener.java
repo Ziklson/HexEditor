@@ -43,6 +43,7 @@ public class WorkPaneCaretListener implements CaretListener {
             Document doc=hexPane.getDocument();
             String strAtPos = "";
 
+            hexPane.getWorkPane().setLastFocus(0);
 //            hText.removeAllHighlights();
             //hHex.removeAllHighlights();
             if(hexPane.getCaretHigh() != null)
@@ -81,7 +82,7 @@ public class WorkPaneCaretListener implements CaretListener {
         }
         else{
             if(textPane.hasFocus() && !hexPane.isInserting()){
-
+                hexPane.getWorkPane().setLastFocus(1);
                 Document doc=hexPane.getDocument();
                 String strAtPos = "0";
                 int size=hexPane.getSymbolsCount();
