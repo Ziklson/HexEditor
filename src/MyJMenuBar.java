@@ -115,7 +115,13 @@ public class MyJMenuBar extends JMenuBar {
         pasteOver.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                myJFrame.getMyworkPane().getHexArea().insert();
+                myJFrame.getMyworkPane().getHexArea().insertOver(true);
+            }
+        });
+        pasteIns.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                myJFrame.getMyworkPane().getHexArea().insertOver(false);
             }
         });
 
