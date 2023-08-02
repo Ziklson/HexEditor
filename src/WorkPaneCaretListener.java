@@ -35,6 +35,9 @@ public class WorkPaneCaretListener implements CaretListener {
         hText=textPane.getHighlighter();
     }
 
+
+
+
     @Override
     public void caretUpdate(CaretEvent e) {
         if(e.getSource().getClass().getName().equals(hexPane.getClass().getName()) && hexPane.hasFocus() && !hexPane.getWorkPane().getjScrollBarV().hasFocus() && !hexPane.isInserting()){

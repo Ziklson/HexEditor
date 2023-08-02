@@ -180,10 +180,20 @@ public class HexPane extends JTextArea {
 
     private int curSize;
 
+    private int selStart;
+
+    private int selEnd;
+
+    private boolean isSelecting;
+
+
     HexPane(MyWorkPane workPane, MyJFrame myJFrame) {
         super();
         //
         curSize=0;
+        selStart=0;
+        selEnd=0;
+        isSelecting=false;
         font=new Font(Font.MONOSPACED, Font.PLAIN,22);
         int charW=getFontMetrics(font).charWidth(' ');
         int charH=getFontMetrics(font).getHeight();
@@ -267,10 +277,24 @@ public class HexPane extends JTextArea {
                 doNothing);
 
 
+
+
+
         addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                //setInserting(true);
+                int x=e.getX();
+                int y=e.getY();
+                int str=workPane.getjScrollBarV().getValue();
+
+                System.out.println("X " +x + " Y " + y);
+
+                if(y < 0 && str > 0){
+                    workPane.getjScrollBarV().setValue(str-1);
+                }
+                if(y>rows*charH){
+                    workPane.getjScrollBarV().setValue(str+1);
+                }
             }
 
             @Override
@@ -782,24 +806,110 @@ public class HexPane extends JTextArea {
     }
 
 
+
+//    public class BufferWorker extends SwingWorker<Object, Object> {
+//        int size;
+//        int curBuff;
+//        int size2;
+//        int str;
+//        BufferWorker(int str){
+//          size=0;
+//          curBuff=0;
+//          size2=0;
+//          this.str=str;
+//        }
+//
+//        @Override
+//        protected Object doInBackground() throws Exception {
+//            while(size <= str){
+//                if(isTempFileExist(curBuff)){
+//                    size2=(int) getTempFileSize(getTempFile(curBuff));
+////                size+=getTempFileSize(getTempFile(curBuff));
+//                }
+//                else{
+//                    size2=byteBuffer.length/2;
+////                size+=byteBuffer.length/2;
+//                }
+//                curBuff+=byteBuffer.length/2;
+//                size+=size2;
+//            }
+//            curSize=size-size2;
+//            return null;
+//        }
+//    }
+
+
+
     public int getCurBuff(int str){
         int size=0;
         int curBuff=0;
         int size2=0;
-        while(size <= str){
-            if(isTempFileExist(curBuff)){
-                size2=(int) getTempFileSize(getTempFile(curBuff));
-//                size+=getTempFileSize(getTempFile(curBuff));
+//        System.out.println("Old curSize " + curSize);
+////        System.out.println("Old startBuff " + startBuff);
+        curBuff=startBuff;
+        size=curSize;
+        if(size <= str){
+            while(size <= str){
+                if(isTempFileExist(curBuff)){
+                    size2=(int) getTempFileSize(getTempFile(curBuff));
+                }
+                else{
+                    size2=byteBuffer.length/2;
+                }
+                curBuff+=byteBuffer.length/2;
+                size+=size2;
+            }
+            curSize=size-size2;
+            curBuff-=byteBuffer.length/2;
+        }
+        else{
+            curBuff-=byteBuffer.length/2;
+            if(curBuff < 0){
+                curBuff=0;
+                curSize=0;
             }
             else{
-                size2=byteBuffer.length/2;
-//                size+=byteBuffer.length/2;
+                while(size > str){
+                    if(isTempFileExist(curBuff)){
+                        size2=(int) getTempFileSize(getTempFile(curBuff));
+                    }
+                    else{
+                        size2=byteBuffer.length/2;
+                    }
+                    curBuff-=byteBuffer.length/2;
+                    size-=size2;
+//                    if(size <= 0 || curBuff <= 0){
+//                        size=0;
+//                        curBuff=0;
+//                        break;
+//                    }
+                }
+                curSize=size;
+                curBuff+=byteBuffer.length/2;
             }
-            curBuff+=byteBuffer.length/2;
-            size+=size2;
         }
-        curSize=size-size2;
-        return curBuff-byteBuffer.length/2;
+//        System.out.println("curSize " + curSize);
+//        System.out.println("Str " + str);
+//        System.out.println("StartBuff " + curBuff);
+        return curBuff;
+
+//        while(size <= str){
+//            if(isTempFileExist(curBuff)){
+//                size2=(int) getTempFileSize(getTempFile(curBuff));
+//            }
+//            else{
+//                size2=byteBuffer.length/2;
+//            }
+//            curBuff+=byteBuffer.length/2;
+//            size+=size2;
+//        }
+//        curSize=size-size2;
+//        System.out.println("curSize " + curSize);
+//        System.out.println("Str " + str);
+//        int ppl=curBuff-byteBuffer.length/2;
+//        System.out.println("StartBuff " + ppl);
+
+        //return curBuff-byteBuffer.length/2;
     }
 
     public void readBuffer(int pos){ // pos - положение JScrollBar
@@ -825,7 +935,7 @@ public class HexPane extends JTextArea {
                 else{
                     curSize-=byteBuffer.length/2;
                 }
-                System.out.println("StartBuff " + startBuff);
+//                System.out.println("StartBuff " + startBuff);
                 readFile(curPath,startBuff, false,false);
 
             }
@@ -842,7 +952,7 @@ public class HexPane extends JTextArea {
                         curSize+=byteBuffer.length/2;
                     }
                     startBuff+=byteBuffer.length/2;
-                    System.out.println("StartBuff " + startBuff);
+//                    System.out.println("StartBuff " + startBuff);
                     readFile(curPath,startBuff, false,false);
                 }
                 else{
@@ -941,7 +1051,6 @@ public class HexPane extends JTextArea {
     }
 
     public void saveBuffer(int offset){ //offset == startBuffer
-        //int dirNumb=startBuff/limit_file_per_dir;
 
         int size=byteArr.size();
         int curBuff=offset;
@@ -991,7 +1100,6 @@ public class HexPane extends JTextArea {
 
         //
 
-        System.out.println("size "+ size);
         int fcount=(size/(byteBuffer.length/2))+1; // сколько файлов вмещает в себя текущий byteArr
 
         if(size % (byteBuffer.length/2) == 0){
@@ -999,7 +1107,7 @@ public class HexPane extends JTextArea {
             lastFileSize=byteBuffer.length/2;
         }
 
-        if((size % (byteBuffer.length/2)) > (byteBuffer.length/4)){
+        if((size % (byteBuffer.length/2)) >= (byteBuffer.length/4)){
             // можем записывать файлы, мин.размер соблюден
             lastFileSize=size % (byteBuffer.length/2);
         }
@@ -1009,13 +1117,10 @@ public class HexPane extends JTextArea {
             }
             else{
                 preLastFileSize=(byteBuffer.length/2)-(byteBuffer.length/4 - (size % (byteBuffer.length/4))); // before last file size
-                System.out.println("PreLast " + preLastFileSize);
                 lastFileSize=byteBuffer.length/4;
             }
-
         }
 
-        System.out.println("Last " + lastFileSize);
         if(size > fileInBuffCount * byteBuffer.length/2){
             int extraFilesCount=((size-(fileInBuffCount * (byteBuffer.length/2)))/(byteBuffer.length/2))+1;
             if(size % byteBuffer.length/2 == 0){
@@ -1138,10 +1243,9 @@ public class HexPane extends JTextArea {
             }
         }
 
-//        System.out.println("Fcount "+fcount);
-//        System.out.println("FileInBuffCount " + fileInBuffCount);
 
 //        if(fcount < fileInBuffCount){
+//            System.out.println("Buffer has more files");
 //            for(int i=fcount+1;i<fileInBuffCount+1;i++){
 //                if(isTempFileExist(curBuff+(i-1)*byteBuffer.length/2)){
 //                    path=getTempFile(curBuff+(i-1)*byteBuffer.length/2);
@@ -1368,10 +1472,7 @@ public class HexPane extends JTextArea {
             System.out.println(workPane.getjScrollBarV().getMaximum());
         }
         textPane.setColumnsCount(columns);
-
-
         readBuffer(workPane.getjScrollBarV().getValue());
-
         setPreferredSize(new Dimension(0,0));
         textPane.setPreferredSize(new Dimension(0,0));
 
@@ -1485,8 +1586,6 @@ public class HexPane extends JTextArea {
         int pos=(str*bytes)%byteBuffer.length;
         if(lastIndFound != -1)
             pos=lastIndFound;
-
-
         boolean find;
         int offset=0;
         int offset2=0;
@@ -1498,7 +1597,6 @@ public class HexPane extends JTextArea {
             offset=-byteBuffer.length;
             offset2=-1;
         }
-
             for(int cb=curBuff;cb<getFileSize() && cb>=0;cb+=offset){
                 find=true;
                 for(int p=pos;p<buffFullness && p>=0;p+=offset2){
@@ -1638,8 +1736,8 @@ public class HexPane extends JTextArea {
                     setSymbolsCount((int) newSize * 3 - 1);
 
                     saveBuffer(curBuffer);
-                    buffFullness=0;
-                    byteArr.clear();
+                    startBuff=getCurBuff(str*bytes);
+
                     readFile(curPath,startBuff,false,false);
                     insertPage(str*bytes - curSize);
                 }
