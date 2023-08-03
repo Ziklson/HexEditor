@@ -47,6 +47,17 @@ public class TextPane extends JTextArea {
     private Object searchHigh;
 
 
+    public Object getSelHigh() {
+        return selHigh;
+    }
+
+    public void setSelHigh(Object selHigh) {
+        this.selHigh = selHigh;
+    }
+
+    private Object selHigh;
+
+
     TextPane(HexPane hexPane) {
         super();
         //
