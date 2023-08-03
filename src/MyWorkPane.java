@@ -203,6 +203,10 @@ public class MyWorkPane extends JPanel {
                 updateRowHeader(rows,columns,value);
                 hexArea.readBuffer(value);
 
+                if(!hexArea.isSelecting()){
+                    hexArea.doSelection();
+                }
+
 
             }
         });

@@ -184,7 +184,13 @@ public class HexPane extends JTextArea {
 
     private int selEnd;
 
+    public boolean isSelecting() {
+        return isSelecting;
+    }
+
     private boolean isSelecting;
+
+    private Object selHigh;
 
 
     HexPane(MyWorkPane workPane, MyJFrame myJFrame) {
@@ -279,23 +285,149 @@ public class HexPane extends JTextArea {
 
 
 
-
-        addMouseMotionListener(new MouseMotionListener() {
+        addMouseListener(new MouseListener() {
             @Override
-            public void mouseDragged(MouseEvent e) {
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
                 int x=e.getX();
                 int y=e.getY();
                 int str=workPane.getjScrollBarV().getValue();
 
-                System.out.println("X " +x + " Y " + y);
+                int xPos=x/charW;
+
+                int yPos=(y/charH)*(columns+1);
+
+                xPos+=yPos;
+
+
+                //selStart=(xPos/3)*(str+1);
+                selStart=(getCaretPosition()/3) + (str*bytes);
+
+                System.out.println("selStart " + selStart);
+                isSelecting=true;
+
+
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                int x=e.getX();
+                int y=e.getY();
+                int str=workPane.getjScrollBarV().getValue();
+                if(x>(charW*columns))
+                    x=charW*columns;
+                if(y>charH*rows)
+                    y=charH*(rows-1);
+
+                int xPos=x/charW;
+
+                int yPos=(y/charH)*(columns+1);
+
+                xPos+=yPos;
+
+                selEnd=(xPos/3) + (str*bytes);
+
+                if(selEnd == selStart){
+                    if(selHigh != null)
+                        getHighlighter().removeHighlight(selHigh);
+                    if(textPane.getSelHigh() != null)
+                        textPane.getHighlighter().removeHighlight(textPane.getSelHigh());
+                }
+
+
+
+                System.out.println("selEnd " +selEnd);
+
+                isSelecting=false;
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
+
+
+        addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+
+                int x=e.getX();
+                int y=e.getY();
+                int str=workPane.getjScrollBarV().getValue();
+
+                if(selHigh != null)
+                    getHighlighter().removeHighlight(selHigh);
+
+                System.out.println("HighCCount " + getHighlighter().getHighlights().length);
+
+                System.out.println(getHighlighter().getHighlights()[getHighlighter().getHighlights().length-1].getEndOffset());
 
                 if(y < 0 && str > 0){
+
+
                     workPane.getjScrollBarV().setValue(str-1);
+                    int xPos=x/charW;
+                    if(xPos < 0)
+                        xPos=0;
+
+                    if(xPos > (columns+1))
+                        xPos=(columns+1);
+                    try {
+                        int end;
+
+                        end=(selStart-((str-1)*bytes))*3 + 3;
+
+                        if(end < xPos || end > (rows*columns+1))
+                            end=rows*(columns+1);
+
+                        System.out.println("xPOs " + xPos + " end " + end);
+
+                        selHigh=getHighlighter().addHighlight(xPos,end,DefaultHighlighter.DefaultPainter);
+
+                    } catch (BadLocationException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
-                if(y>rows*charH){
-                    workPane.getjScrollBarV().setValue(str+1);
+
+                if(y>rows*charH && str < workPane.getjScrollBarV().getMaximum()-20){
+
+                        workPane.getjScrollBarV().setValue(str+1);
+                        int xPos=x/charW;
+                        if(xPos < 0)
+                            xPos=0;
+                        if(xPos > (columns+1))
+                            xPos=(columns+1);
+                        int yPos=(rows-1)*(columns+1);
+                        xPos+=yPos;
+                        try {
+                            int start;
+
+                            start=(selStart-((str+1)*bytes))*3;
+                            if(start < 0 || start > xPos)
+                                start=0;
+
+                            System.out.println("xPOs " + xPos + " start " + start);
+                            selHigh=getHighlighter().addHighlight(start,xPos,DefaultHighlighter.DefaultPainter);
+
+                        } catch (BadLocationException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
                 }
-            }
+
 
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -326,6 +458,62 @@ public class HexPane extends JTextArea {
 
     }
 
+
+    public void doSelection(){
+        if(selHigh != null)
+            getHighlighter().removeHighlight(selHigh);
+
+        if(textPane.getSelHigh() != null)
+            textPane.getHighlighter().removeHighlight(textPane.getSelHigh());
+
+        if(selStart != selEnd){
+            System.out.println("Start Sel " +selStart + " endSel " + selEnd);
+            if(selStart > selEnd){
+                int temp=selStart;
+                selStart=selEnd;
+                selEnd=temp;
+            }
+
+            int start;
+            int end;
+            int str=workPane.getjScrollBarV().getValue();
+            if(selStart < str*bytes){
+                start=0;
+            }
+            else{
+                if(selStart < str*bytes + rows*bytes){
+                    start=(selStart-((str)*bytes))*3;
+                }
+                else{
+                    start=-1;
+                }
+            }
+            if(selEnd<str*bytes){
+                end=-1;
+            }
+            else{
+                if(selEnd < str*bytes + rows*bytes){
+                    end=(selEnd-((str)*bytes))*3+2;
+                }
+                else{
+                    end=rows*bytes*3;
+                }
+            }
+            if(end < 0 || start < 0){
+                // nothing
+            }
+            else{
+                try {
+                    selHigh=getHighlighter().addHighlight(start,end,DefaultHighlighter.DefaultPainter);
+                    textPane.setSelHigh(textPane.getHighlighter().addHighlight(start/3,end/3 + 1,DefaultHighlighter.DefaultPainter));
+                } catch (BadLocationException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Start  " +start + " end " + end);
+            }
+
+        }
+    }
 
     public int[] getKeys() {
         return keys;
