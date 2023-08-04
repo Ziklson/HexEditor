@@ -104,6 +104,14 @@ public class MyJMenuBar extends JMenuBar {
         paste.add(pasteOver);
         paste.add(pasteIns);
 
+        cut.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                myJFrame.getMyworkPane().getHexArea().cut();
+            }
+        });
+
+
 
         find.addActionListener(new ActionListener() {
             @Override
