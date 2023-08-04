@@ -142,55 +142,21 @@ public class MyWorkPane extends JPanel {
 
 
 
-//        hexAreaPane.add(rowHeader,new GridBagConstraints(0,1,1,2,0.001,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
-//        hexAreaPane.add(columnHeader,new GridBagConstraints(1,0,1,1,1,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-
-//        hexAreaPane.add(hexArea,new GridBagConstraints(1,1,1,1,1,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-
-//        hexAreaPane.add(textPane,new GridBagConstraints(2,1,1,1,1,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-
-
-///////
-//        hexAreaPane.add(hexArea,new GridBagConstraints(0,0,1,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 0, 1, 1),0,0));
-
-//        hexAreaPane.add(textPane,new GridBagConstraints(1,0,1,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 20, 1, 1),0,0));
-///////
-
-
-        //hexAreaPane.add(new JPanel(),new GridBagConstraints(2,0,1,1,1,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(0, 20, 1, 1),0,0));
-
-//        jScrollPane=new JScrollPane(hexAreaPane);
-//
-//        JViewport jViewport = new JViewport();
-//        JViewport jViewport2 = new JViewport();
-//
-//        jViewport.setView(columnHeader);
-//        jViewport2.setView(rowHeader);
         columnHeader.setBackground(new Color(229,228,226));
         columnHeader.setForeground(new Color(255,0,0));
         rowHeader.setBackground(new Color(229,228,226));
         rowHeader.setForeground(new Color(255,0,0));
-//        jScrollPane.setColumnHeader(jViewport);
-//        jScrollPane.setRowHeader(jViewport2);
 
 
 
         jScrollBarV = new JScrollBar(Adjustable.VERTICAL);
-//        JScrollBar jScrollBarH=new JScrollBar(Adjustable.HORIZONTAL);
-//        jScrollBarH.setMinimum(0);
-//        jScrollBarH.setMaximum(200);
 
-       // jScrollBarV.setMinimum(0);
-        //jScrollBarV.setMaximum(200);
         jScrollBarV.setUnitIncrement(1);
         jScrollBarV.setBlockIncrement(1);
 
 
-//        jScrollBarV.setUnitIncrement(1);
 
-//        jScrollBarV.setVisibleAmount(1);
-//        jScrollBarV.setMinimumSize(new Dimension(0,1));
 
 
         jScrollBarV.addAdjustmentListener(new AdjustmentListener() {
@@ -268,26 +234,6 @@ public class MyWorkPane extends JPanel {
         add(jScroll,new GridBagConstraints(0,0,1,1,1,1,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
 
         add(jScrollBarV,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.VERTICAL,new Insets(1, 1, 1, 1),0,0));
-//////////////
-
-//        add(columnHeader,new GridBagConstraints(1,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-//
-//
-//        add(rowHeader,new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-//
-//
-//
-//
-//        add(hexArea,new GridBagConstraints(1,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 1, 1, 1),0,0));
-//
-//        add(cl,new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.NONE,new Insets(1, 10, 1, 1),0,0));
-//
-//        add(textPane,new GridBagConstraints(2,1,1,1,0,0,GridBagConstraints.NORTH,GridBagConstraints.BOTH,new Insets(1, 10, 1, 1),0,0));
-//
-//
-//        add(jScrollBarV,new GridBagConstraints(3,1,1,1,1,1,GridBagConstraints.WEST,GridBagConstraints.VERTICAL,new Insets(1, 1, 1, 1),0,0));
-
-//        add(jScrollBarH,new GridBagConstraints(0,2,3,1,0,1,GridBagConstraints.NORTH,GridBagConstraints.HORIZONTAL,new Insets(1, 1, 1, 1),0,0));
 
 
 
