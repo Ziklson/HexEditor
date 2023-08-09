@@ -236,7 +236,7 @@ public class HexPane extends JTextArea {
         //
         curSize=0;
         selStart=0;
-        selEnd=0;
+        selEnd=32010;
         isSelecting=false;
         font=new Font(Font.MONOSPACED, Font.PLAIN,22);
         int charW=getFontMetrics(font).charWidth(' ');
@@ -1196,51 +1196,15 @@ public class HexPane extends JTextArea {
         int preLastFileSize=byteBuffer.length/2;
         int lastFileSize=0;
 
-
-//        if(size <= byteBuffer.length){
-//            if(size <= byteBuffer.length/2){
-//                if(isTempFileExist(offset)){
-//                    path=getTempFile(offset);
-//                }
-//                else{
-//                    path=createTempFile(offset);
-//                }
-//                writeTempFile(path,size,0);
-//
-//                if(isTempFileExist(offset+byteBuffer.length/2)){
-//                    path=getTempFile(offset+byteBuffer.length/2);
-//                }
-//                else{
-//                    path=createTempFile(offset+byteBuffer.length/2);
-//                }
-//                writeTempFile(path,0,0);
-//            }
-//            else{
-//                if(isTempFileExist(offset)){
-//                    path=getTempFile(offset);
-//                }
-//                else{
-//                    path=createTempFile(offset);
-//                }
-//                writeTempFile(path,byteBuffer.length/2,0);
-//                if(isTempFileExist(offset+byteBuffer.length/2)){
-//                    path=getTempFile(offset+byteBuffer.length/2);
-//                }
-//                else{
-//                    path=createTempFile(offset+byteBuffer.length/2);
-//                }
-//                writeTempFile(path,size-byteBuffer.length/2,byteBuffer.length/2);
-//            }
-//        }
-
-        //
-
         int fcount=(size/(byteBuffer.length/2))+1; // сколько файлов вмещает в себя текущий byteArr
 
         if(size % (byteBuffer.length/2) == 0){
             fcount-=1;
             lastFileSize=byteBuffer.length/2;
         }
+        System.out.println("size " + size);
+        System.out.println("fcount " + fcount);
+        System.out.println("fileInBuffCount " + fileInBuffCount);
 
         if((size % (byteBuffer.length/2)) >= (byteBuffer.length/4)){
             // можем записывать файлы, мин.размер соблюден
@@ -1256,7 +1220,7 @@ public class HexPane extends JTextArea {
             }
         }
 
-        if(size > fileInBuffCount * byteBuffer.length/2){
+        if(size > fileInBuffCount * byteBuffer.length/2){ // было size > fileInBuffCount * byteBuffer.length/2
             int extraFilesCount=((size-(fileInBuffCount * (byteBuffer.length/2)))/(byteBuffer.length/2))+1;
             if(size % byteBuffer.length/2 == 0){
                 extraFilesCount-=1;
@@ -1290,6 +1254,26 @@ public class HexPane extends JTextArea {
 
         }
 
+        if(fcount < fileInBuffCount){
+            System.out.println("Buffer has more files");
+            for(int i=fcount+1;i<fileInBuffCount+1;i++){
+                int fname=curBuff+(i-1)*(byteBuffer.length/2);
+                if(isTempFileExist(fname)){
+                    path=getTempFile(fname);
+                }
+                else{
+                    path=createTempFile(fname);
+                }
+                try(RandomAccessFile raf=new RandomAccessFile(path.toString(),"rw")) {
+                    raf.setLength(0);
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
 
         for(int i=1;i<fcount;i++){
             if(isTempFileExist(curBuff)){
@@ -1313,6 +1297,7 @@ public class HexPane extends JTextArea {
         }
 
         if(fcount == 1){
+            System.out.println("FCOUNT == " + fcount);
             int curBuff2=curBuff;
             long wrSize=0;
             Path nextPath=null;
@@ -1354,10 +1339,18 @@ public class HexPane extends JTextArea {
                 for(int j=0;j<tmpBuff.length;j++){
                     byteArr.add(tmpBuff[j]);
                 }
-                writeTempFile(path,byteArr.size()-byteBuffer.length/4,0,false);
-                writeTempFile(nextPath,byteBuffer.length/4,byteBuffer.length/4,false);
+
+                int psize=byteArr.size()-(byteBuffer.length/2);
+                System.out.println("pSize is " + psize);
+                writeTempFile(path,byteBuffer.length/2,0,false);
+                if(nextPath.equals(curPath)){
+                    nextPath=getTempFile(curBuff2+byteBuffer.length/2);
+                }
+                System.out.println("nextPath is " + nextPath.toString());
+                writeTempFile(nextPath,psize,byteBuffer.length/2,false);
             }
             else{
+               System.out.println("nextPath is NULL " + nextPath.toString());
                writeTempFile(path,size,0,false);
             }
         }
@@ -1881,9 +1874,6 @@ public class HexPane extends JTextArea {
             readFile(curPath,startBuff,false,false);
         }
 
-
-
-
         while(cutCount != 0){
             if(selStart >= curSize && selStart < curSize+buffFullness){
                 if(ind != 0)
@@ -1911,15 +1901,15 @@ public class HexPane extends JTextArea {
         isCutting=false;
 
         workPane.getjScrollBarV().setValue(selStart/bytes);
-//        startBuff=tmpBuff;
-//        readFile(curPath,startBuff,false,false);
-//        insertPage(ind);
+        startBuff=tmpBuff;
+        readFile(curPath,startBuff,false,false);
+        insertPage(ind);
 //
 
         selStart=0;
         selEnd=0;
         doSelection();
-        System.out.println(workPane.getjScrollBarV().getValue());
+        System.out.println("str " + workPane.getjScrollBarV().getValue());
 
 
 
