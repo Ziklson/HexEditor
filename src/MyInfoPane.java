@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.nio.ByteBuffer;
 
 public class MyInfoPane extends JPanel {
 
@@ -19,15 +20,38 @@ public class MyInfoPane extends JPanel {
 
     private JLabel byteTypeLabel;
 
-    private JLabel unsignedLabel;
+    private JLabel uINT8Label;
 
-    private JLabel signedLabel;
+    private JLabel INT8Label;
 
-    private JLabel byteTypeUnsignedValueLabel;
+    private JLabel uINT8ValueLabel;
 
-    private JLabel byteTypeSignedValueLabel;
+    private JLabel INT8ValueLabel;
 
     private JLabel byteTypeValueLabel;
+
+    private JLabel blockLabel;
+
+
+
+    private JLabel uINT16ValueBlockLabel; // для блока из 2ух байт
+    private JLabel INT16ValueBlockLabel;  // для блока из 2ух байт
+
+    private JLabel uINT32ValueBlockLabel; // для блока из 4ех байт
+
+    private JLabel INT32ValueBlockLabel; // для блока из 4ех байт
+
+    private JLabel floatValueBlockLabel; // для блока из 4ех байт
+    private JLabel doubleValueBlockLabel; // для блока из 8ми байт
+
+    private JLabel uINT16BlockLabel;
+    private JLabel INT16BlockLabel;
+    private JLabel uINT32BlockLabel;
+    private JLabel INT32BlockLabel;
+
+    private JLabel floatBlockLabel;
+    private JLabel doubleBlockLabel;
+
 
 
     private Font font;
@@ -35,6 +59,26 @@ public class MyInfoPane extends JPanel {
     MyInfoPane() {
         super();
         font=new Font(Font.SANS_SERIF, Font.PLAIN,16);
+
+        blockLabel=new JLabel("Block info");
+        uINT16BlockLabel=new JLabel("uINT16"); // Big-Endian
+        INT16BlockLabel=new JLabel("INT16");
+        uINT32BlockLabel=new JLabel("uINT32"); // Big-Endian
+        INT32BlockLabel=new JLabel("INT32");
+
+        floatBlockLabel=new JLabel("Float");
+        doubleBlockLabel=new JLabel("Double");
+
+        uINT16ValueBlockLabel=new JLabel("0"); // Big-Endian
+        INT16ValueBlockLabel=new JLabel("0");
+        uINT32ValueBlockLabel=new JLabel("0"); // Big-Endian
+        INT32ValueBlockLabel=new JLabel("0");
+        floatValueBlockLabel=new JLabel("0");
+        doubleValueBlockLabel=new JLabel("0");
+
+
+
+
 
         fileInfoLabel=new JLabel("File information");
         fileNameLabel=new JLabel("File Name: ");
@@ -44,13 +88,32 @@ public class MyInfoPane extends JPanel {
         fileNameValueLabel=new JLabel("-Untitled-");
         fileNameValueLabel.setSize(20,20);
         byteTypeLabel=new JLabel("Type");
-        unsignedLabel=new JLabel("Unsigned (+)");
-        signedLabel=new JLabel("Signed(±)");
-        byteTypeValueLabel=new JLabel("Integer");
+        uINT8Label=new JLabel("Unsigned (+)");
+        INT8Label=new JLabel("Signed(±)          "); // 5 пробелов, шо б ширина инфопанели всегда была статична и не изменялась из за double value
+        byteTypeValueLabel=new JLabel("INT8");
 
-        byteTypeUnsignedValueLabel=new JLabel("0");
-        byteTypeSignedValueLabel=new JLabel("0");
+        uINT8ValueLabel=new JLabel("0");
+        INT8ValueLabel=new JLabel("0");
 
+
+        blockLabel.setFont(font);
+
+        uINT16BlockLabel.setFont(font);
+        INT16BlockLabel.setFont(font);
+        uINT32BlockLabel.setFont(font);
+        INT32BlockLabel.setFont(font);
+        floatBlockLabel.setFont(font);
+        doubleBlockLabel.setFont(font);
+
+        uINT16ValueBlockLabel.setFont(font);
+        INT16ValueBlockLabel.setFont(font);
+
+        uINT32ValueBlockLabel.setFont(font);
+        INT32ValueBlockLabel.setFont(font);
+
+
+        floatValueBlockLabel.setFont(font);
+        doubleValueBlockLabel.setFont(font);
 
 
         fileInfoLabel.setFont(font);
@@ -62,11 +125,11 @@ public class MyInfoPane extends JPanel {
         fileSizeValueLabel.setFont(font);
 
         byteTypeLabel.setFont(font);
-        unsignedLabel.setFont(font);
-        signedLabel.setFont(font);
+        uINT8Label.setFont(font);
+        INT8Label.setFont(font);
         byteTypeValueLabel.setFont(font);
-        byteTypeUnsignedValueLabel.setFont(font);
-        byteTypeSignedValueLabel.setFont(font);
+        uINT8ValueLabel.setFont(font);
+        INT8ValueLabel.setFont(font);
 
 
 
@@ -84,15 +147,47 @@ public class MyInfoPane extends JPanel {
 
         add(byteTypeLabel,new GridBagConstraints(0,4,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
-        add(unsignedLabel,new GridBagConstraints(1,4,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+        add(uINT8Label,new GridBagConstraints(1,4,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
-        add(signedLabel,new GridBagConstraints(2,4,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+        add(INT8Label,new GridBagConstraints(2,4,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
         add(byteTypeValueLabel,new GridBagConstraints(0,5,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
-        add(byteTypeUnsignedValueLabel,new GridBagConstraints(1,5,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
-        add(byteTypeSignedValueLabel,new GridBagConstraints(2,5,1,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+        add(uINT8ValueLabel,new GridBagConstraints(1,5,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+        add(INT8ValueLabel,new GridBagConstraints(2,5,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
+//        add(blockLabel,new GridBagConstraints(0,6,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+
+
+
+//        add(uINT16BlockLabel,new GridBagConstraints(0,7,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(INT16BlockLabel,new GridBagConstraints(0,6,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+//        add(uINT32BlockLabel,new GridBagConstraints(0,8,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(INT32BlockLabel,new GridBagConstraints(0,7,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+
+
+        add(floatBlockLabel,new GridBagConstraints(0,8,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(doubleBlockLabel,new GridBagConstraints(0,9,1,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(uINT16ValueBlockLabel,new GridBagConstraints(1,6,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(INT16ValueBlockLabel,new GridBagConstraints(2,6,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(uINT32ValueBlockLabel,new GridBagConstraints(1,7,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(INT32ValueBlockLabel,new GridBagConstraints(2,7,1,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+
+
+        add(floatValueBlockLabel,new GridBagConstraints(1,8,2,1,0,0,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
+
+        add(doubleValueBlockLabel,new GridBagConstraints(1,9,2,1,0,1,GridBagConstraints.NORTHWEST,GridBagConstraints.NONE,new Insets(1, 1, 1, 1),0,0));
 
 
         setBackground(new Color(229,228,226));
@@ -114,18 +209,42 @@ public class MyInfoPane extends JPanel {
     }
 
 
-    public void setByteValueLabel(String byteValue){
-        if(byteValue.equals("undefined")){
-            this.byteTypeUnsignedValueLabel.setText(byteValue);
-            this.byteTypeSignedValueLabel.setText(byteValue);
+    public void setByteValueLabel(byte b){
+        uINT8ValueLabel.setText(Integer.toString(Byte.toUnsignedInt(b)));
+        INT8ValueLabel.setText(Byte.toString(b));
+
+    }
+
+    public void setBlockValueLabels(byte[] arr){
+        byte[] barr=new byte[8];
+
+        for(int i= arr.length-1,j=barr.length-1;i>=0;i--,j--){
+            barr[j]=arr[i];
         }
-        else{
-            int unsigned = Integer.parseInt(byteValue,16);
-            int signed=unsigned;
-            if(unsigned>127)
-                signed=unsigned-256;
-            this.byteTypeUnsignedValueLabel.setText(Integer.toString(unsigned));
-            this.byteTypeSignedValueLabel.setText(Integer.toString(signed));
-        }
+//        System.out.println("byteLength " +arr.length);
+//        StringBuilder sb=new StringBuilder();
+//        for(byte b: barr){
+//            sb.append(b);
+//            sb.append(" ");
+//        }
+//        sb.deleteCharAt(sb.length()-1);
+//        blockHexValueLabel.setText(sb.toString());
+        ByteBuffer buffer = ByteBuffer.wrap(barr);
+
+
+        short a=buffer.getShort();
+        uINT16ValueBlockLabel.setText(Integer.toString(Short.toUnsignedInt(a)));
+        INT16ValueBlockLabel.setText(Short.toString(a));
+        buffer=ByteBuffer.wrap(barr);
+        int b=buffer.getInt();
+        uINT32ValueBlockLabel.setText(Long.toString(Integer.toUnsignedLong(b)));
+        INT32ValueBlockLabel.setText(Integer.toString(b));
+        buffer=ByteBuffer.wrap(barr);
+        floatValueBlockLabel.setText(Float.toString(buffer.getFloat()));
+        buffer=ByteBuffer.wrap(barr);
+        doubleValueBlockLabel.setText(Double.toString(buffer.getDouble()));
+
+
+
     }
 }
