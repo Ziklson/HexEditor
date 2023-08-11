@@ -58,52 +58,26 @@ public class WorkPaneCaretListener implements CaretListener {
             if(textPane.getCaretHigh() != null)
                 hText.removeHighlight(textPane.getCaretHigh());
 
-//            System.out.println("CaretPosHex" + posHex);
 //
-        int strr=hexPane.getWorkPane().getjScrollBarV().getValue();
-        bt=strr*hexPane.getBytes() + posHex/3 - hexPane.getCurSize();
-//
-//        List<Byte> arr = hexPane.getByteArr();
-//
-//        byte[] arr2=new byte[8];
-//        if(bt + arr2.length < arr.size()){
-//            for(int i=0;i<arr2.length;i++){
-//                arr2[i]= arr.get(bt);
-//                bt++;
-//            }
-//        }
-//        else{
-//            for(int i=arr.size()-1,j=arr2.length-1;i>=bt;i--,j--){
-//                arr2[j]=arr.get(i);
-//            }
-//        }
-//        hexPane.getInfoPane().setBlockValueLabels(arr2);
+            int strr=hexPane.getWorkPane().getjScrollBarV().getValue();
+            bt=strr*hexPane.getBytes() + posHex/3 - hexPane.getCurSize();
 
 
-        if (posHex != size) { // Чтобы не было бага с переносом новой строки
+        if (posHex != size) { // Чтобы не было бага с переносом новой строки != size было
                 try {
                     if (posHex % 3 == 0) {
                         hexPane.setCaretHigh(hHex.addHighlight(posHex, posHex + 2, new DefaultHighlighter.DefaultHighlightPainter(new Color(173, 203, 255))));
-                        //hHex.addHighlight(posHex, posHex + 2, DefaultHighlighter.DefaultPainter);
-//                        strAtPos = doc.getText(posHex, 2);
-//                        if(strAtPos.charAt(1) != ' ')
-//                            hexPane.getInfoPane().setByteValueLabel(strAtPos);
                     }
                     if (posHex % 3 == 1) {
-//                        hHex.addHighlight(posHex - 1, posHex+1, DefaultHighlighter.DefaultPainter);
                         hexPane.setCaretHigh(hHex.addHighlight(posHex - 1, posHex+1, new DefaultHighlighter.DefaultHighlightPainter(new Color(173, 203, 255))));
-//                        strAtPos = doc.getText(posHex - 1, 2);
-//                        if(strAtPos.charAt(1) != ' ')
-//                            hexPane.getInfoPane().setByteValueLabel(strAtPos);
+//
                     }
-//                    hText.addHighlight(posHex/3, posHex/3+1, DefaultHighlighter.DefaultPainter);
                     textPane.setCaretHigh(hText.addHighlight(posHex/3, posHex/3+1, new DefaultHighlighter.DefaultHighlightPainter(new Color(173, 203, 255))));
-
                 } catch (BadLocationException ex) {
                     ex.printStackTrace();
                 }
             }else{
-//            hexPane.getInfoPane().setByteValueLabel("undefined");
+////            hexPane.getInfoPane().setByteValueLabel("undefined");
         }
         }
         else{
@@ -123,14 +97,10 @@ public class WorkPaneCaretListener implements CaretListener {
                 bt=strr*hexPane.getBytes() + posText - hexPane.getCurSize();
 
 
-
                 if(posText*3 != size){
                     try {
                         hexPane.setCaretHigh(hHex.addHighlight(posText*3,posText*3+2, new DefaultHighlighter.DefaultHighlightPainter(new Color(173, 203, 255))));
                         textPane.setCaretHigh(hText.addHighlight(posText, posText+ 1, new DefaultHighlighter.DefaultHighlightPainter(new Color(173, 203, 255))));
-//                        strAtPos = doc.getText(posText*3, 2);
-//                        if(strAtPos.charAt(0) != ' ')
-//                            hexPane.getInfoPane().setByteValueLabel(strAtPos);
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }

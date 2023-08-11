@@ -158,17 +158,6 @@ public class TextPane extends JTextArea {
                     hexPane.setSelStart(hexPane.getSelStart()-1);
 
                 hexPane.setSelEnd(cp);
-//                hexPane.setSelEnd(xPos + (str*columns));
-
-//                int cp=getCaretPosition() + (str*columns);
-//                if(cp != hexPane.getSelStart()){
-//                    if(cp > hexPane.getSelStart())
-//                        cp-=1;
-//                    else
-//                        hexPane.setSelStart(hexPane.getSelStart()-1);
-//                }
-
-//                hexPane.setSelEnd(cp);
 
 
                 if(hexPane.getSelEnd() == hexPane.getSelStart()){
@@ -318,9 +307,11 @@ public class TextPane extends JTextArea {
             char key =e.getKeyChar();
             int pos=textPane.getCaretPosition();
             int size=hexPane.getSymbolsCount();
+            int curStr=hexPane.getWorkPane().getjScrollBarV().getValue();
+            int bor=(pos*3+1)+curStr*(hexPane.getColumns()+1);
             e.consume();
             if(key > 20 && key < 256){
-                if(pos*3 < size){
+                if(size > bor){
                     hexPane.setInserting(true);
                     hexPane.replaceRange(Integer.toHexString((int) key),pos*3,pos*3+2);
                     if((int) key == 127)
@@ -328,33 +319,55 @@ public class TextPane extends JTextArea {
                     else
                         textPane.replaceRange(Character.toString(key),pos,pos+1);
                     hexPane.setInserting(false);
+
+                    int offset=curStr*hexPane.getBytes()+pos - hexPane.getStartBuff();
+                    if(!hexPane.isBufferChanged())
+                        hexPane.setBufferChanged(true);
+
+                    Byte b= (byte) key;
+                    hexPane.getByteArr().set(offset,b);
+
                     if(pos == columns*rows-1){
-                        hexPane.getWorkPane().getjScrollBarV().setValue(hexPane.getWorkPane().getjScrollBarV().getValue()+1);
-                        setCaretPosition(columns*(rows-1));
+                            hexPane.getWorkPane().getjScrollBarV().setValue(curStr+1);
+                            setCaretPosition(columns*(rows-1));
                     }
                     else{
                         setCaretPosition(pos+1);
                     }
-                    int curStr=hexPane.getWorkPane().getjScrollBarV().getValue();
-                    int offset=curStr*hexPane.getBytes()+pos - hexPane.getStartBuff();
-                    if(!hexPane.isBufferChanged())
-                        hexPane.setBufferChanged(true);
-                    Byte b= (byte) key;
-                    hexPane.getByteArr().set(offset,b);
-
                 }
                 else{
+
                     size+=3;
+                    hexPane.getInfoPane().setFileSizeValueLabel(Integer.toString((size+1)/3));
+
                     hexPane.setSymbolsCount(size);
+                    hexPane.setFileSize(hexPane.getFileSize()+1);
                     hexPane.setInserting(true);
                     textPane.insert(Character.toString(key),pos);
                     hexPane.insert(Integer.toHexString((int) key),pos*3);
                     hexPane.insert(" ",pos*3+2);
-                    hexPane.getInfoPane().setFileSizeValueLabel(Integer.toString((size+1)/3));
                     hexPane.setInserting(false);
+                    hexPane.getByteArr().add((byte) Integer.parseInt(Integer.toHexString((int) key), 16));
+                    if(!hexPane.isBufferChanged())
+                        hexPane.setBufferChanged(true);
+
+
+
                     if(pos == columns*rows-1){
-                        hexPane.getWorkPane().getjScrollBarV().setValue(hexPane.getWorkPane().getjScrollBarV().getValue()+1);
-                        setCaretPosition(columns*(rows-1));
+                        if(curStr+20 == hexPane.getWorkPane().getjScrollBarV().getMaximum()){
+                            hexPane.getWorkPane().getjScrollBarV().setMaximum(hexPane.getWorkPane().getjScrollBarV().getMaximum()+1);
+                            hexPane.getWorkPane().getjScrollBarV().setValue(curStr + 1);
+                            setCaretPosition((columns) * (rows - 1));
+                        }
+                        else{
+                            hexPane.getWorkPane().getjScrollBarV().setValue(curStr+1);
+                            setCaretPosition(columns*(rows-1));
+                        }
+
+                    }
+                    else{
+                        setCaretPosition(pos+1);
+
                     }
                 }
             }
@@ -369,17 +382,20 @@ public class TextPane extends JTextArea {
                         hexPane.getDocument().remove(pos*3-3, 3);
                         hexPane.setFileSize(hexPane.getFileSize()-1);
 
-                        int curStr=hexPane.getWorkPane().getjScrollBarV().getValue();
                         int offset=curStr*hexPane.getBytes()+pos-1 - hexPane.getCurSize();
                         if(!hexPane.isBufferChanged())
                             hexPane.setBufferChanged(true);
                         hexPane.getByteArr().remove(offset);
-                        hexPane.insertPage((hexPane.getWorkPane().getjScrollBarV().getValue()-hexPane.getCurSize()/hexPane.getBytes())*hexPane.getBytes());
+                        hexPane.insertPage((curStr-hexPane.getCurSize()/hexPane.getBytes())*hexPane.getBytes());
                         setCaretPosition(pos-1);
-
-
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
+                    }
+                }
+                else{
+                    if(curStr != 0){
+                        hexPane.getWorkPane().getjScrollBarV().setValue(curStr-1);
+                        setCaretPosition(columns);
                     }
                 }
             }
@@ -406,15 +422,18 @@ public class TextPane extends JTextArea {
                 }
             }
             if (code == KeyEvent.VK_RIGHT) {
-                if(pos < (rows*columns) - 1){
-                    setCaretPosition(pos+1);
-                }
-                else{
-                    if(str != hexPane.getWorkPane().getjScrollBarV().getMaximum()){
-                        hexPane.getWorkPane().getjScrollBarV().setValue(str+1);
-                        setCaretPosition(columns*(rows-1));
+                if(pos*3 < hexPane.getSymbolsCount()){
+                    if(pos < (rows*columns) - 1){
+                        setCaretPosition(pos+1);
+                    }
+                    else{
+                        if(str != hexPane.getWorkPane().getjScrollBarV().getMaximum()){
+                            hexPane.getWorkPane().getjScrollBarV().setValue(str+1);
+                            setCaretPosition(columns*(rows-1));
+                        }
                     }
                 }
+
             }
             if (code == KeyEvent.VK_UP) {
                 if (pos >= columns) { // заменить на смещение по строкам
@@ -433,15 +452,18 @@ public class TextPane extends JTextArea {
                 }
             }
             if (code == KeyEvent.VK_DOWN) {
-                if (pos < (rows-1)*columns) { // заменить на смещение по строкам // было < symbolsCount
-                    setCaretPosition(pos + columns);
-                }
-                else{
-                    if(str != hexPane.getWorkPane().getjScrollBarV().getMaximum()){
-                        hexPane.getWorkPane().getjScrollBarV().setValue(str+1);
-                        setCaretPosition(pos);
+                if(pos*3 + hexPane.getColumns()+1 < hexPane.getSymbolsCount() + 1){
+                    if (pos < (rows-1)*columns) { // заменить на смещение по строкам // было < symbolsCount
+                        setCaretPosition(pos + columns);
+                    }
+                    else{
+                        if(str != hexPane.getWorkPane().getjScrollBarV().getMaximum()){
+                            hexPane.getWorkPane().getjScrollBarV().setValue(str+1);
+                            setCaretPosition(pos);
+                        }
                     }
                 }
+
             }
         }
 

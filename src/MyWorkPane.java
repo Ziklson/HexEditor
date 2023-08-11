@@ -159,6 +159,7 @@ public class MyWorkPane extends JPanel {
 
 
 
+
         jScrollBarV.addAdjustmentListener(new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
