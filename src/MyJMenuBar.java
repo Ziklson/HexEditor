@@ -41,8 +41,6 @@ public class MyJMenuBar extends JMenuBar {
         });
 
 
-        JMenuItem create = new JMenuItem("Create");
-        JMenuItem exit = new JMenuItem("Exit");
         JMenuItem save = new JMenuItem("Save");
         JMenuItem saveAs=new JMenuItem("Save as...");
 
@@ -81,19 +79,15 @@ public class MyJMenuBar extends JMenuBar {
 
 
         file.add(open);
-        file.add(create);
         file.add(save);
         file.add(saveAs);
-        file.add(exit);
         return file;
     }
     private JMenu CreateEditMenu() {
         JMenu edit = new JMenu("Edit");
         JMenuItem cut = new JMenuItem("Cut");
-        JMenuItem copy = new JMenuItem("Copy");
         JMenu paste = new JMenu("Paste");
         JMenuItem find = new JMenuItem("Find");
-        edit.add(copy);
         edit.add(cut);
         edit.add(paste);
         edit.add(find);
