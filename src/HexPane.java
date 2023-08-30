@@ -610,7 +610,7 @@ public class HexPane extends JTextArea {
                 String strAtPos = "";
 
                 int bor=pos+workPane.getjScrollBarV().getValue()*(columns+1);
-                System.out.println("bor " + bor);
+//                System.out.println("bor " + bor);
 
                 if (symbolsCount > bor) {
                     if (pos % 3 == 0) {
@@ -654,9 +654,7 @@ public class HexPane extends JTextArea {
                             hexPane.setCaretPosition(pos + 2);
                         else {
                             if(curStr+20 == workPane.getjScrollBarV().getMaximum()){
-//                                System.out.println("YEY");
-//                                System.out.println("Symbols count " + symbolsCount);
-//                                System.out.println("brsize " + byteArr.size());
+
                                 workPane.getjScrollBarV().setMaximum(workPane.getjScrollBarV().getMaximum()+1);
                                 workPane.getjScrollBarV().setValue(curStr + 1);
                                 setCaretPosition((columns + 1) * (rows - 1));
@@ -701,7 +699,10 @@ public class HexPane extends JTextArea {
 
                         if (!isBufferChanged())
                             setBufferChanged(true);
+
+
                         byteArr.remove(offset);
+
                         insertPage((workPane.getjScrollBarV().getValue() - curSize / bytes) * bytes);
                         setCaretPosition(pos - 3);
                     } catch (BadLocationException ex) {
@@ -812,8 +813,6 @@ public class HexPane extends JTextArea {
                     buffFullness = (int) size;
                 else
                     buffFullness = byteBuffer.length;
-
-
 //                raf.read(byteBuffer, 0, byteBuffer.length);
                 raf.read(byteBuffer, 0, buffFullness);
 
@@ -831,6 +830,7 @@ public class HexPane extends JTextArea {
                 infoPane.setFileSizeValueLabel(Long.toString(size));
 //                setSymbolsCount((int) size * 3 - 1);
                 setSymbolsCount((int) size * 3);
+                System.out.println("SymbolsCount " + getSymbolsCount());
                 setFileSize(size);
                 workPane.getjScrollBarV().setVisibleAmount(rows);
                 workPane.getjScrollBarV().setValue(0);
@@ -1106,12 +1106,12 @@ public class HexPane extends JTextArea {
                 if (extraFilesCount == 1) { // тогда переименовывать файлы не требуется
                     ///
                 } else {
-                    System.out.println("Enough space");
+//                    System.out.println("Enough space");
                     int newOffset = (extraFilesCount - 1) * byteBuffer.length / 2;
                     rename(newOffset, curBuff + byteBuffer.length / 2);
                 }
             } else {
-                System.out.println("Not enough space");
+//                System.out.println("Not enough space");
                 int newOffset = extraFilesCount * byteBuffer.length / 2;
                 rename(newOffset, curBuff);
             }
@@ -1119,7 +1119,7 @@ public class HexPane extends JTextArea {
         }
 
         if (fcount < fileInBuffCount) {
-            System.out.println("Buffer has more files");
+//            System.out.println("Buffer has more files");
             for (int i = fcount + 1; i < fileInBuffCount + 1; i++) {
                 int fname = curBuff + (i - 1) * (byteBuffer.length / 2);
                 if (isTempFileExist(fname)) {
@@ -1154,11 +1154,11 @@ public class HexPane extends JTextArea {
                 pos += byteBuffer.length / 2;
             }
             curBuff += byteBuffer.length / 2;
-            System.out.println("POS " + pos);
+//            System.out.println("POS " + pos);
         }
 
         if (fcount == 1) {
-            System.out.println("FCOUNT == " + fcount);
+//            System.out.println("FCOUNT == " + fcount);
             int curBuff2 = curBuff;
             long wrSize = 0;
             Path nextPath = null;
@@ -1199,15 +1199,15 @@ public class HexPane extends JTextArea {
                 }
 
                 int psize = byteArr.size() - (byteBuffer.length / 2);
-                System.out.println("pSize is " + psize);
+//                System.out.println("pSize is " + psize);
                 writeTempFile(path, byteBuffer.length / 2, 0, false);
                 if (nextPath.equals(curPath)) {
                     nextPath = getTempFile(curBuff2 + byteBuffer.length / 2);
                 }
-                System.out.println("nextPath is " + nextPath.toString());
+//                System.out.println("nextPath is " + nextPath.toString());
                 writeTempFile(nextPath, psize, byteBuffer.length / 2, false);
             } else {
-                System.out.println("nextPath is NULL ");
+//                System.out.println("nextPath is NULL ");
                 writeTempFile(path, size, 0, false);
             }
         } else {
@@ -1241,7 +1241,7 @@ public class HexPane extends JTextArea {
             }
             try {
                 Files.move(path, getTempFile(i + offset));
-                System.out.println("rename " + path.toString() + " into " + getTempFile(i + offset).toString());
+//                System.out.println("rename " + path.toString() + " into " + getTempFile(i + offset).toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1328,10 +1328,10 @@ public class HexPane extends JTextArea {
         this.setColumns(this.columns);
         workPane.setColumns(columns);
         if (curPath != null) {
-            System.out.println(workPane.getjScrollBarV().getMaximum());
+//            System.out.println(workPane.getjScrollBarV().getMaximum());
             int barSize = (int) getFileSize() / bytes + 20;
             workPane.setJScrollBarVSize(barSize);
-            System.out.println(workPane.getjScrollBarV().getMaximum());
+//            System.out.println(workPane.getjScrollBarV().getMaximum());
         }
         textPane.setColumnsCount(columns);
         readBuffer(workPane.getjScrollBarV().getValue());
@@ -1360,10 +1360,10 @@ public class HexPane extends JTextArea {
 
         @Override
         protected Object doInBackground() throws Exception {
-            if (isBufferChanged()) {
-                setBufferChanged(false);
-                saveBuffer(curStartBuf);
-            }
+//            if (isBufferChanged()) {
+//                setBufferChanged(false);
+//                saveBuffer(curStartBuf);
+//            }
             if (!overwrite) {
                 try {
                     Files.createFile(path);
@@ -1376,7 +1376,7 @@ public class HexPane extends JTextArea {
                 int offset4=0;
 
                 for (int i = 0; i < size; i += offset4) { // += byteBuff.length
-                    System.out.println("tyt4");
+//                    System.out.println("tyt4");
                     if(size > 100){
                         setProgress(i / ((int) size / 100));
                     }
@@ -1400,20 +1400,26 @@ public class HexPane extends JTextArea {
                 long end_time = System.nanoTime();
                 long result_time = (end_time - start_time) / 1000000;
                 setProgress(100);
-                System.out.println("Запись окончена " + result_time);
+//                System.out.println("Запись окончена " + result_time);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("CURSTART BUF " + curStartBuf);
-            //readFile(curPath,0,false,false);
+//            System.out.println("CURSTART BUF " + curStartBuf);
+//            readFile(curPath,0,false,false);
+            readFile(curPath,startBuff,false,false);
+
             return null;
         }
     }
 
 
     public void saveAs(Path path, boolean overwrite) {
+        if(isBufferChanged()){
+            saveBuffer(startBuff);
+            setBufferChanged(false);
+        }
         ProgressWorker pw = new ProgressWorker(path, overwrite);
         ProgressBarDialog pd = new ProgressBarDialog(myJFrame);
         pw.addPropertyChangeListener(new PropertyChangeListener() {
@@ -1436,6 +1442,10 @@ public class HexPane extends JTextArea {
             }
         });
         pw.execute();
+//
+//        readFile(curPath,startBuff,false,false);
+//        System.out.println("BufSize " + byteArr.size());
+//
     }
 
     public int search(byte[] searchArr, int direction, int pos_start) { // 0 direction down, 1 - direction up
@@ -1444,7 +1454,7 @@ public class HexPane extends JTextArea {
         // Переписать с учетом curSize
 
         if(isBufferChanged()){
-            System.out.println("SaveBUFFCHANGED?");
+//            System.out.println("SaveBUFFCHANGED?");
             saveBuffer(startBuff);
             setBufferChanged(false);
             readFile(curPath,startBuff,false,false);
@@ -1526,7 +1536,7 @@ public class HexPane extends JTextArea {
                 else
                     pos = buffFullness - 1;
             } else {
-                System.out.println("Не найдено");
+//                System.out.println("Не найдено");
                 readFile(curPath, startBuff, false, false);
                 lastIndFound=-1;
                 return -1;
@@ -1556,7 +1566,7 @@ public class HexPane extends JTextArea {
 //                        pos=str*bytes+caretPosition-startBuff;
                         pos = str * bytes + caretPosition - curSize;
                     } else {
-                        System.out.println("No Focus");
+//                        System.out.println("No Focus");
                         return;
                     }
                 }
@@ -1570,7 +1580,7 @@ public class HexPane extends JTextArea {
                             } else {
                                 saveBuffer(curBuffer);
                                 curBuffer += byteBuffer.length;
-                                System.out.println("Я хочу прочитать след буффер! " + curBuffer);
+//                                System.out.println("Я хочу прочитать след буффер! " + curBuffer);
                                 buffFullness = 0;
                                 byteArr.clear();
                                 readFile(curPath, curBuffer, false, false);
@@ -1580,7 +1590,7 @@ public class HexPane extends JTextArea {
                         saveBuffer(curBuffer);
                         if (curBuffer != startBuff) {
 //                            saveBuffer(curBuffer);
-                            System.out.println("Я загружаю startBuffer!" + startBuff);
+//                            System.out.println("Я загружаю startBuffer!" + startBuff);
                             buffFullness = 0;
                             byteArr.clear();
                             readFile(curPath, startBuff, false, false);
@@ -1591,7 +1601,7 @@ public class HexPane extends JTextArea {
                         else
                             textPane.setCaretPosition(caretPosition);
                     } else {
-                        System.out.println("Я не работаю!");
+//                        System.out.println("Я не работаю!");
                     }
                 } else {
                     for (int i = 0; i < ins.length; i++) {

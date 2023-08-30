@@ -71,6 +71,8 @@ public class WorkPaneCaretListener implements CaretListener {
                     if (posHex % 3 == 1) {
                         hexPane.setCaretHigh(hHex.addHighlight(posHex - 1, posHex+1, new DefaultHighlighter.DefaultHighlightPainter(new Color(173, 203, 255))));
 //
+//                        System.out.println("PosHex " + posHex);
+
                     }
                     textPane.setCaretHigh(hText.addHighlight(posHex/3, posHex/3+1, new DefaultHighlighter.DefaultHighlightPainter(new Color(173, 203, 255))));
                 } catch (BadLocationException ex) {
